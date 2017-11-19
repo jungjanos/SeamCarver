@@ -24,5 +24,10 @@ namespace SeamCarving
         {
             InitializeComponent();
         }
+
+        private void clickedFileOpen(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
