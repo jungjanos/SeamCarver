@@ -6,19 +6,25 @@
         xmlns:local="clr-namespace:SeamCarving"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="SeamCarving.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" HorizontalAlignment="Left" VerticalAlignment="Top">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_New" />
-                <MenuItem x:Name="OpenMenu" Header="_Open" Checked="clickedFileOpen" />
+                <MenuItem x:Name="OpenMenu" Header="_Open" Click="clickedFileOpen" />
                 <MenuItem Header="_Save" />
                 <Separator />
                 <MenuItem Header="_Exit" />
             </MenuItem>
             <MenuItem Header="_Edit"/>
             <MenuItem Header="_View"/>
-            <MenuItem Header="_Help"/>            
+            <MenuItem Header="_Help"/>
         </Menu>
+        <StackPanel HorizontalAlignment="Left" Background="#FFF7F7F7" MinWidth="100">
+            <Label Content="Image size:" FontSize="12" Background="{x:Null}"/>
+            <Label x:Name="widthLabel" Content="Width: "/>
+            <Label x:Name="heightLabel" Content="Height:"/>
+        </StackPanel>        
+        <Image x:Name="ImageControl" VerticalAlignment="Top"/>
     </DockPanel>
 </Window>
