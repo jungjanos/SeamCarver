@@ -44,7 +44,6 @@ namespace SeamCarving
         {
 
             // Displays an Open File Dialog to load an image for display and edit              
-
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
             openFileDialog.DefaultExt = ".jpg";
@@ -52,8 +51,7 @@ namespace SeamCarving
             openFileDialog.ShowDialog();
 
 
-            // Loads the image and displays it 
-            
+            // Loads the image and displays it             
             image = new System.Windows.Controls.Image();
             image.Source = new BitmapImage(new Uri(openFileDialog.FileName, UriKind.RelativeOrAbsolute));
             image.Stretch = Stretch.Uniform;            
@@ -61,7 +59,6 @@ namespace SeamCarving
 
 
             // loads same file as bitmap (BMP) to memory to work on
-
             bitmap = new Bitmap(openFileDialog.FileName);
             
             updateSizeDisplay();
