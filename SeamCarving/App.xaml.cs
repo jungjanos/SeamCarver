@@ -13,5 +13,13 @@ namespace SeamCarving
     /// </summary>
     public partial class App : Application
     {
+        private void globalExceptionHandler(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show(e.Exception.Message, "Program error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+
+            e.Handled = true;
+
+        }
+
     }
 }

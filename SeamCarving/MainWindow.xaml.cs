@@ -23,11 +23,13 @@ namespace SeamCarving
     public partial class MainWindow : Window
     {
         private System.Windows.Controls.Image image;
-        Bitmap bitmap;
+        BusinessLogic businessLogic;
+
 
         public MainWindow()
         {
             InitializeComponent();
+            businessLogic = new BusinessLogic();
 
             var mainWindow = Application.Current.MainWindow;
             mainWindow.SizeToContent = SizeToContent.WidthAndHeight;
@@ -36,8 +38,11 @@ namespace SeamCarving
 
         private void updateSizeDisplay()
         {
-            widthLabel.Content = "Width: " + bitmap.Width + "pixels";
-            heightLabel.Content = "Height: " + bitmap.Height + "pixels";
+            if (businessLogic.ImageWorkingSize.IsEmpty == false)
+            {
+                widthLabel.Content = "Width: " + businessLogic.ImageWorkingSize.Width + "pixels";
+                heightLabel.Content = "Height: " + businessLogic.ImageWorkingSize.Height + "pixels";
+            }
         }
 
         private void clickedFileOpen(object sender, RoutedEventArgs e)
@@ -59,7 +64,8 @@ namespace SeamCarving
 
 
             // loads same file as bitmap (BMP) to memory to work on
-            bitmap = new Bitmap(openFileDialog.FileName);
+            businessLogic.bitmap = new Bitmap(openFileDialog.FileName);
+            businessLogic.SetupSeamCarver();
             
             updateSizeDisplay();
             
