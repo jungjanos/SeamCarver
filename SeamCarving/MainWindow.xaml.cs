@@ -66,6 +66,7 @@ namespace SeamCarving
             // loads same file as bitmap (BMP) to memory to work on
             businessLogic.bitmap = new Bitmap(openFileDialog.FileName);
             businessLogic.SetupSeamCarver();
+            businessLogic.sH.FindHorizontalSeam();
             
             updateSizeDisplay();
             
