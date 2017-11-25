@@ -111,7 +111,7 @@ namespace SeamCarving
         //public SeamCarver(string fullFilePath) { this.bitmap = new Bitmap(fullFilePath); }
         
 
-        public int Value(int x, int y)
+        public int PixelValue(int x, int y)
         {
             return valueMap[x][y];
         }
@@ -238,7 +238,13 @@ namespace SeamCarving
 
 
         
-        
+        //private int getPixelValue(int x, int y)
+        //{
+        //    if (x == 0)
+        //    {
+
+        //    }
+        //}
 
         public void RemoveHorizontalSeam(int[] seam)
         {
