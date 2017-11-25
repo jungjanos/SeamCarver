@@ -92,20 +92,127 @@ namespace SeamCarving
                         ];
                 }
             }
-
-            //filling horizontal border pixel values with MAX numbers (to avoid carving the borders)
-            for (int x = 0; x < width; ++x)
+            //filling up corner pixels
             {
-                valueMap[x][0] = sqrtLookup[sqr[255] * 6];
-                valueMap[x][height-1] = sqrtLookup[sqr[255] * 6];
-            }
+                //filling corner pixels: top left corner
+                valueMap[0][0] = sqrtLookup[
+                        sqr[Math.Abs((pixelList[1][0].R - pixelList[width - 1][0].R))]
+                        + sqr[Math.Abs((pixelList[1][0].G - pixelList[width - 1][0].G))]
+                        + sqr[Math.Abs((pixelList[1][0].B - pixelList[width - 1][0].B))]
+                        //+ sqr[Math.Abs((pixelList[1][0].A - pixelList[width - 1][0].A))]
 
-            //filling vertical border pixel values with MAX numbers (to avoid carving the borders)
+                        + sqr[Math.Abs((pixelList[0][1].R - pixelList[0][height - 1].R))]
+                        + sqr[Math.Abs((pixelList[0][1].G - pixelList[0][height - 1].G))]
+                        + sqr[Math.Abs((pixelList[0][1].B - pixelList[0][height - 1].B))]
+                        //+ sqr[Math.Abs((pixelList[0][0].A - pixelList[0][height -1].A))]
+                        ];
+
+                //filling corner pixels: top right corner
+                valueMap[width - 1][0] = sqrtLookup[
+                        sqr[Math.Abs((pixelList[0][0].R - pixelList[width - 2][0].R))]
+                        + sqr[Math.Abs((pixelList[0][0].G - pixelList[width - 2][0].G))]
+                        + sqr[Math.Abs((pixelList[0][0].B - pixelList[width - 2][0].B))]
+                        //+ sqr[Math.Abs((pixelList[0][0].A - pixelList[width - 2][0].A))]
+
+                        + sqr[Math.Abs((pixelList[width - 1][1].R - pixelList[width - 1][height - 1].R))]
+                        + sqr[Math.Abs((pixelList[width - 1][1].G - pixelList[width - 1][height - 1].G))]
+                        + sqr[Math.Abs((pixelList[width - 1][1].B - pixelList[width - 1][height - 1].B))]
+                        //+ sqr[Math.Abs((pixelList[width -1][0].A - pixelList[width -1][height -1].A))]
+                        ];
+
+                //filling corner pixels: bottom left corner
+                valueMap[0][height - 1] = sqrtLookup[
+                        sqr[Math.Abs((pixelList[1][height - 1].R - pixelList[width - 1][height - 1].R))]
+                        + sqr[Math.Abs((pixelList[1][height - 1].G - pixelList[width - 1][height - 1].G))]
+                        + sqr[Math.Abs((pixelList[1][height - 1].B - pixelList[width - 1][height - 1].B))]
+                        //+ sqr[Math.Abs((pixelList[1][height -1].A - pixelList[width - 1][height -1].A))]
+
+                        + sqr[Math.Abs((pixelList[0][0].R - pixelList[0][height - 2].R))]
+                        + sqr[Math.Abs((pixelList[0][0].G - pixelList[0][height - 2].G))]
+                        + sqr[Math.Abs((pixelList[0][0].B - pixelList[0][height - 2].B))]
+                        //+ sqr[Math.Abs((pixelList[0][0].A - pixelList[0][height -2].A))]
+                        ];
+
+                //filling corner pixels: bottom right corner
+                valueMap[width - 1][height - 1] = sqrtLookup[
+                        sqr[Math.Abs((pixelList[0][height - 1].R - pixelList[width - 2][height - 1].R))]
+                        + sqr[Math.Abs((pixelList[0][height - 1].G - pixelList[width - 2][height - 1].G))]
+                        + sqr[Math.Abs((pixelList[0][height - 1].B - pixelList[width - 2][height - 1].B))]
+                        //+ sqr[Math.Abs((pixelList[0][height -1].A - pixelList[width - 2][height -1].A))]
+
+                        + sqr[Math.Abs((pixelList[width - 1][0].R - pixelList[width - 1][height - 2].R))]
+                        + sqr[Math.Abs((pixelList[width - 1][0].G - pixelList[width - 1][height - 2].G))]
+                        + sqr[Math.Abs((pixelList[width - 1][0].B - pixelList[width - 1][height - 2].B))]
+                        //+ sqr[Math.Abs((pixelList[width - 1][0].A - pixelList[width - 1][height -2].A))]
+                        ];
+            }          
+            
+
+            //filling horizontal border pixel values 
+            for (int x = 1; x < width-1; ++x)
+            {
+                //filling the top row
+                valueMap[x][0] = sqrtLookup[
+                        sqr[Math.Abs((pixelList[x + 1][0].R - pixelList[x - 1][0].R))]
+                        + sqr[Math.Abs((pixelList[x + 1][0].G - pixelList[x - 1][0].G))]
+                        + sqr[Math.Abs((pixelList[x + 1][0].B - pixelList[x - 1][0].B))]
+                        //+ sqr[Math.Abs((pixelList[x + 1][0].A - pixelList[x - 1][0].A))]
+
+
+                        + sqr[Math.Abs((pixelList[x][height-1].R - pixelList[x][1].R))]
+                        + sqr[Math.Abs((pixelList[x][height-1].G - pixelList[x][1].G))]
+                        + sqr[Math.Abs((pixelList[x][height-1].B - pixelList[x][1].B))]
+                        //+ sqr[Math.Abs((pixelList[x][height].A - pixelList[x][1].A))]
+                        ];
+                //filling the bottom row
+                valueMap[x][height-1] = sqrtLookup[
+                        sqr[Math.Abs((pixelList[x + 1][height-1].R - pixelList[x - 1][height - 1].R))]
+                        + sqr[Math.Abs((pixelList[x + 1][height - 1].G - pixelList[x - 1][height - 1].G))]
+                        + sqr[Math.Abs((pixelList[x + 1][height - 1].B - pixelList[x - 1][height - 1].B))]
+                        //+ sqr[Math.Abs((pixelList[x + 1][height-1].A - pixelList[x - 1][height-1].A))]
+
+
+                        + sqr[Math.Abs((pixelList[x][height - 2].R - pixelList[x][0].R))]
+                        + sqr[Math.Abs((pixelList[x][height - 2].G - pixelList[x][0].G))]
+                        + sqr[Math.Abs((pixelList[x][height - 2].B - pixelList[x][0].B))]
+                        //+ sqr[Math.Abs((pixelList[x][height - 2].A - pixelList[x][0].A))]
+                        ];
+            }
+            
+
+            //filling vertical border pixel values
             for (int y = 1; y < height-1; ++y)
             {
-                valueMap[0][y] = sqrtLookup[sqr[255] * 6];
-                valueMap[width-1][y] = sqrtLookup[sqr[255] * 6];
+                //filling the leftmost column
+                valueMap[0][y] = sqrtLookup[
+                        sqr[Math.Abs((pixelList[1][y].R - pixelList[width - 1][y].R))]
+                        + sqr[Math.Abs((pixelList[1][y].G - pixelList[width - 1][y].G))]
+                        + sqr[Math.Abs((pixelList[1][y].B - pixelList[width - 1][y].B))]
+                        //+ sqr[Math.Abs((pixelList[1][y].A - pixelList[width - 1][y].A))]
+
+
+                        + sqr[Math.Abs((pixelList[0][y + 1].R - pixelList[0][y - 1].R))]
+                        + sqr[Math.Abs((pixelList[0][y + 1].G - pixelList[0][y - 1].G))]
+                        + sqr[Math.Abs((pixelList[0][y + 1].B - pixelList[0][y - 1].B))]
+                        //+ sqr[Math.Abs((pixelList[0][y + 1].A - pixelList[0][y - 1].A))]
+                        ];
+
+
+                //filling the rightmost row
+                valueMap[width-1][y] = sqrtLookup[
+                        sqr[Math.Abs((pixelList[0][y].R - pixelList[width - 2][y].R))]
+                        + sqr[Math.Abs((pixelList[0][y].G - pixelList[width - 2][y].G))]
+                        + sqr[Math.Abs((pixelList[0][y].B - pixelList[width - 2][y].B))]
+                        //+ sqr[Math.Abs((pixelList[0][y].A - pixelList[width - 2][y].A))]
+
+
+                        + sqr[Math.Abs((pixelList[width - 1][y + 1].R - pixelList[width - 1][y - 1].R))]
+                        + sqr[Math.Abs((pixelList[width - 1][y + 1].G - pixelList[width - 1][y - 1].G))]
+                        + sqr[Math.Abs((pixelList[width - 1][y + 1].B - pixelList[width - 1][y - 1].B))]
+                        //+ sqr[Math.Abs((pixelList[width - 1][y + 1].A - pixelList[width - 1][y - 1].A))]
+                        ];
             }
+
             seamMapSetUp();
         }
         //public SeamCarver(string fullFilePath) { this.bitmap = new Bitmap(fullFilePath); }
@@ -190,7 +297,6 @@ namespace SeamCarving
             int[] horizontalSeam = new int [width];
             int helper;
             seamMapSetUp();
-
 
             horizontalSeam[width - 1] = seamMap[width - 1].FindIndex(a => a.Equals(seamMap[width - 1].Min()));
             
