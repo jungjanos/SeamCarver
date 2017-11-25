@@ -343,14 +343,14 @@ namespace SeamCarving
         //public List<int> FindVerticalSeam() { }
 
 
-        
-        //private int getPixelValue(int x, int y)
-        //{
-        //    if (x == 0)
-        //    {
 
-        //    }
-        //}
+        private void updatePixelValue(int x, int y)
+        {
+            if (x == 0)
+            {
+
+            }
+        }
 
         public void RemoveHorizontalSeam(int[] seam)
         {
