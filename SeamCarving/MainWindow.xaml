@@ -20,11 +20,18 @@
             <MenuItem Header="_View"/>
             <MenuItem Header="_Help"/>
         </Menu>
-        <StackPanel HorizontalAlignment="Left" Background="#FFF7F7F7" MinWidth="100">
+        <StackPanel HorizontalAlignment="Left" Background="#FFF7F7F7" MinWidth="100" Width="123.067">
             <Label Content="Image size:" FontSize="12" Background="{x:Null}"/>
             <Label x:Name="widthLabel" Content="Width: "/>
             <Label x:Name="heightLabel" Content="Height:"/>
-        </StackPanel>        
+            <Label x:Name="CarveImageLabel" Content="Carve image by:" FontSize="12"/>
+            <WrapPanel x:Name="CarveWrapePanel" ClipToBounds="True">
+                <TextBox x:Name="CarveImageTextBox" Style="{DynamicResource SimpleTextBox}" TextWrapping="Wrap" MinWidth="60" ClipToBounds="True" Width="73.333"/>
+                <Label x:Name="CarveImagePixLabel" Content="pixels" ClipToBounds="True" Width="48.657"/>
+            </WrapPanel>
+            <ToggleButton x:Name="directionButton" Content="horizontally" Click="directionButtonClicked"/>
+            <Button x:Name="ApplyCarvingButton" Content="Apply" Margin="0,10,0,0" HorizontalAlignment="Center" Click="clickApplyCarvingButton"/>
+        </StackPanel>
         <Image x:Name="ImageControl" VerticalAlignment="Top"/>
     </DockPanel>
 </Window>

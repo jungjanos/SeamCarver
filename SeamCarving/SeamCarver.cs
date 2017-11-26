@@ -342,29 +342,62 @@ namespace SeamCarving
 
         //public List<int> FindVerticalSeam() { }
 
-
+        // modKadder() is used to increment/decrement the X or Y coordinate by one in modK arithmetic 
+        // the implementation is generic. The concreate usage is: 
+        // coordinate: value of X or X ccordinate
+        // add: -1 or +1 : ---> so the function evaluates to X or Y coordinate of the logical neighbour
+        // modK: will be current image width height
+        private int modKadder(int coordinate, int add, int modK)
+        {
+            return ((coordinate + add) % modK);
+        }
 
         private void updatePixelValue(int x, int y)
         {
-            if (x == 0)
-            {
+            valueMap[x][y] = sqrtLookup[
+                        sqr[Math.Abs((pixelList[modKadder(x, 1,width)][y].R - pixelList[modKadder(x, -1, width)][y].R))]
+                        + sqr[Math.Abs((pixelList[modKadder(x, 1, width)][y].G - pixelList[modKadder(x, -1, width)][y].G))]
+                        + sqr[Math.Abs((pixelList[modKadder(x, 1, width)][y].B - pixelList[modKadder(x, -1, width)][y].B))]
+                        //+ sqr[Math.Abs((pixelList[modKadder(x,1,width)][y].A - pixelList[modKadder(x,-1,width)][y].A))]
 
-            }
+
+                        + sqr[Math.Abs((pixelList[x][modKadder(y, 1, height)].R - pixelList[x][modKadder(y, -1, height)].R))]
+                        + sqr[Math.Abs((pixelList[x][modKadder(y, 1, height)].G - pixelList[x][modKadder(y, -1, height)].G))]
+                        + sqr[Math.Abs((pixelList[x][modKadder(y, 1, height)].B - pixelList[x][modKadder(y, -1, height)].B))]
+                        //+ sqr[Math.Abs((pixelList[x][modKadder(y, 1, height)].A - pixelList[x][modKadder(y, -1, height)].A))]
+                        ];
         }
 
         public void RemoveHorizontalSeam(int[] seam)
         {
-            
+
             //removes the seam from the pixelList, making each column shorter by one element : height -> height-1
+            int helper;
             for (int x = 0; x < width; ++x)
             {
-                pixelList[x].RemoveAt(seam[x]);
+                helper = seam[x];
+                pixelList[x].RemoveAt(helper);
+                valueMap[x].RemoveAt(helper);
             }
+            --height;
+            for (int x =0; x < width; ++x)
+            {
+                updatePixelValue(x, modKadder(seam[x], -1, height));
+                updatePixelValue(x, modKadder(seam[x], 0, height));
+            }         
+        }
 
-            throw new Exception("Not implemented");
-            
+        //This function removes N horizontal seams. At least 4 rows need to remain. If height-N < 4, then
+        //height-4 rows are removed
+        public void RemoveNHorizontalSeams(int n)
+        {
+            int rowsToRemove = Math.Min(n, height - 4);
+            while (rowsToRemove > 0)
+            {
+                --rowsToRemove;
 
-
+                RemoveHorizontalSeam(FindHorizontalSeam());
+            }
         }
 
         public void RemoveVerticalSeam(int[] seam) { }        

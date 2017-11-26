@@ -24,6 +24,8 @@ namespace SeamCarving
     {
         private System.Windows.Controls.Image image;
         BusinessLogic businessLogic;
+        public bool ImageLoaded { set; get; } = false;
+        
 
 
         public MainWindow()
@@ -66,11 +68,46 @@ namespace SeamCarving
             // loads same file as bitmap (BMP) to memory to work on
             businessLogic.bitmap = new Bitmap(openFileDialog.FileName);
             businessLogic.SetupSeamCarver();
-            businessLogic.sH.FindHorizontalSeam();
+           
+            //line below is only included for hard wired testing, needs to be cut out
+            // businessLogic.sH.FindHorizontalSeam();
             
             updateSizeDisplay();
-            
+            ImageLoaded = true;
+            showCarvingOptions();
+                        
+        }
 
+        private void showCarvingOptions()
+        {
+            if (ImageLoaded)
+            {
+                CarveImageLabel.Visibility = Visibility.Visible;
+                CarveWrapePanel.Visibility = Visibility.Visible;
+                directionButton.Visibility = Visibility.Visible;
+                ApplyCarvingButton.Visibility = Visibility.Visible;
+            }
+        }
+        private void directionButtonClicked(object sender, RoutedEventArgs e)
+        {          
+
+            switch (directionButton.IsChecked)
+            {
+                case true:
+                    directionButton.Content = "horizontally"; break;
+                case false:
+                    directionButton.Content = "vertically"; break;
+            }
+
+        }
+
+        private void clickApplyCarvingButton(object sender, RoutedEventArgs e)
+        {
+            int numberOfSeams = int.Parse(CarveImageTextBox.Text);
+
+            // for now hard wired to carve horizontally
+
+            businessLogic.sH.RemoveNHorizontalSeams(numberOfSeams);
 
             
         }
