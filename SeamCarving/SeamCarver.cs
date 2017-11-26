@@ -405,6 +405,21 @@ namespace SeamCarving
 
                 RemoveHorizontalSeam(FindHorizontalSeam());
             }
+            SaveBitmap();
+        }
+
+        public void SaveBitmap()
+        {
+            Bitmap bitmap = new Bitmap(width, height);
+            for (int x = 0; x < width; ++x)
+            {
+                for (int y = 0; y < height; ++y)
+                {
+                    bitmap.SetPixel(x, y, pixelList[x][y]);
+                    bitmap.Save(@"c:\TMP\mod.bmp");
+                }
+            }
+            
         }
 
         public void RemoveVerticalSeam(int[] seam) { }        

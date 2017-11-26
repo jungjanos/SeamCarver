@@ -26,6 +26,7 @@ namespace SeamCarving
         BusinessLogic businessLogic;
         public bool ImageLoaded { set; get; } = false;
         
+        
 
 
         public MainWindow()
@@ -63,6 +64,7 @@ namespace SeamCarving
             image.Source = new BitmapImage(new Uri(openFileDialog.FileName, UriKind.RelativeOrAbsolute));
             image.Stretch = Stretch.Uniform;            
             ImageControl.Source = image.Source;
+            
 
 
             // loads same file as bitmap (BMP) to memory to work on
