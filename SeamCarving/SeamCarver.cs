@@ -264,28 +264,30 @@ namespace SeamCarving
                         seamMap[x].Add(-1);
                     }
                 }
-                //building the seamMap according to the valueMap
-
-                //first column comes directly from the valueMap
-                for (int y = 0; y < height; ++y)
-                {
-                    seamMap[0][y] = valueMap[0][y];
-                }
-
-                for (int x = 1; x < width; ++x)
-                {
-                    // x, y=0 pixel is an "edge case", int.MaxValue is a placeholder for min3(...)
-                    seamMap[x][0] = valueMap[x][0] + min3(seamMap[x - 1][1], seamMap[x - 1][0], int.MaxValue);
-
-                    for (int y = 1; y < height-1; ++y)
-                    {
-                        seamMap[x][y] = valueMap[x][y] + min3(seamMap[x - 1][y - 1], seamMap[x - 1][y + 1], seamMap[x - 1][y]);
-                    }
-
-                    // x, y=height-1 pixel is an "edge case", int.MaxValue is a placeholder for min3(...)
-                    seamMap[x][height-1] = valueMap[x][height-1] + min3(seamMap[x - 1][height-2], seamMap[x - 1][height-1], int.MaxValue);
-                }
                 SeamMapSetUp = true;
+            }
+        }
+
+        private void calculateSeamMap()
+        {
+            //building the seamMap according to the valueMap
+            //first column comes directly from the valueMap
+            for (int y = 0; y < height; ++y)
+            {
+                seamMap[0][y] = valueMap[0][y];
+            }
+
+            for (int x = 1; x < width; ++x)
+            {
+                // x, y=0 pixel is an "edge case", int.MaxValue is a placeholder for min3(...)
+                seamMap[x][0] = valueMap[x][0] + min3(seamMap[x - 1][1], seamMap[x - 1][0], int.MaxValue);
+
+                for (int y = 1; y < height - 1; ++y)
+                {
+                    seamMap[x][y] = valueMap[x][y] + min3(seamMap[x - 1][y - 1], seamMap[x - 1][y + 1], seamMap[x - 1][y]);
+                }
+                // x, y=height-1 pixel is an "edge case", int.MaxValue is a placeholder for min3(...)
+                seamMap[x][height - 1] = valueMap[x][height - 1] + min3(seamMap[x - 1][height - 2], seamMap[x - 1][height - 1], int.MaxValue);
             }
         }
 
@@ -297,6 +299,7 @@ namespace SeamCarving
             int[] horizontalSeam = new int [width];
             int helper;
             seamMapSetUp();
+            calculateSeamMap();
 
             horizontalSeam[width - 1] = seamMap[width - 1].FindIndex(a => a.Equals(seamMap[width - 1].Min()));
             
@@ -349,12 +352,13 @@ namespace SeamCarving
         // modK: will be current image width height
         private int modKadder(int coordinate, int add, int modK)
         {
-            return ((coordinate + add) % modK);
+            if (coordinate+add >= 0) return ((coordinate + add) % modK);
+            else return (((coordinate + add) % modK) + modK);
         }
 
         private void updatePixelValue(int x, int y)
         {
-            valueMap[x][y] = sqrtLookup[
+                valueMap[x][y] = sqrtLookup[
                         sqr[Math.Abs((pixelList[modKadder(x, 1,width)][y].R - pixelList[modKadder(x, -1, width)][y].R))]
                         + sqr[Math.Abs((pixelList[modKadder(x, 1, width)][y].G - pixelList[modKadder(x, -1, width)][y].G))]
                         + sqr[Math.Abs((pixelList[modKadder(x, 1, width)][y].B - pixelList[modKadder(x, -1, width)][y].B))]
@@ -378,6 +382,9 @@ namespace SeamCarving
                 helper = seam[x];
                 pixelList[x].RemoveAt(helper);
                 valueMap[x].RemoveAt(helper);
+                
+                //making saemMap one row shorter calculation cost: width X O(1)
+                seamMap[x].RemoveAt(height - 1);
             }
             --height;
             for (int x =0; x < width; ++x)
