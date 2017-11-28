@@ -18,14 +18,18 @@ namespace SeamCarving
         private Int16[] sqrtLookup;
         private int[] sqr;
         public bool SeamMapSetUp { set; get; }
+        private List<ResultInfoItem> messageList;
 
 
-        public SeamCarverH(Bitmap bitmap)
+
+
+        public SeamCarverH(Bitmap bitmap, List<ResultInfoItem> messageList)
         {
             SeamMapSetUp = false;
             this.bitmap = bitmap;
             height = this.bitmap.Height;
             width = this.bitmap.Width;
+            this.messageList = messageList;
 
 
             //Setting up square root lookup table
@@ -337,6 +341,7 @@ namespace SeamCarving
                                                 seamMap[x][helper + 1], helper + 1,
                                                 seamMap[x][helper], helper
                                                     );
+                        
                     }
                 }
             }

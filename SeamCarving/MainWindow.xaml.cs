@@ -33,13 +33,11 @@ namespace SeamCarving
         public MainWindow()
         {
             InitializeComponent();
-            businessLogic = new BusinessLogic();
+            //businessLogic = new BusinessLogic();
 
             var mainWindow = Application.Current.MainWindow;
             mainWindow.SizeToContent = SizeToContent.WidthAndHeight;
             ResultsToDisplay = new List<ResultInfoItem>();
-
-
 
 
             ResultDataGrid.ItemsSource = ResultsToDisplay;
@@ -99,15 +97,17 @@ namespace SeamCarving
             image.Source = new BitmapImage(new Uri(openFileDialog.FileName, UriKind.RelativeOrAbsolute));
             image.Stretch = Stretch.Uniform;            
             ImageControl.Source = image.Source;
-            
 
 
-            // loads same file as bitmap (BMP) to memory to work on
-            businessLogic.bitmap = new Bitmap(openFileDialog.FileName);
-            businessLogic.SetupSeamCarver();
-           
+
+            //// loads same file as bitmap (BMP) to memory to work on
+            //businessLogic.bitmap = new Bitmap(openFileDialog.FileName);
+            //businessLogic.SetupSeamCarver();
+
             //line below is only included for hard wired testing, needs to be cut out
             // businessLogic.sH.FindHorizontalSeam();
+
+            businessLogic = new BusinessLogic(ResultsToDisplay, openFileDialog.FileName);
             
             updateSizeDisplay();
             ImageLoaded = true;
