@@ -113,5 +113,21 @@ namespace SeamCarving
             ResultDataGrid.Items.Refresh();
 
         }
+
+        private void uncheckedShowMessages(object sender, RoutedEventArgs e)
+        {
+            //ResultDataGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void checkedShowMessages(object sender, RoutedEventArgs e)
+        {
+            //ResultDataGrid.Visibility = Visibility.Visible;
+        }
+
+        private void clickedShowMessages(object sender, RoutedEventArgs e)
+        {
+            if (ResultDataGrid.Visibility == Visibility.Visible) ResultDataGrid.Visibility = Visibility.Collapsed;
+            else ResultDataGrid.Visibility = Visibility.Visible;
+        }
     }
 }

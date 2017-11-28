@@ -17,7 +17,9 @@
                 <MenuItem Header="_Exit" />
             </MenuItem>
             <MenuItem Header="_Edit"/>
-            <MenuItem Header="_View"/>
+            <MenuItem Header="_View">
+                <MenuItem x:Name="ShowMessages" Header="Show messages" IsCheckable="True" IsChecked="True" Unchecked="uncheckedShowMessages" Checked="checkedShowMessages" Click="clickedShowMessages"/>
+            </MenuItem>
             <MenuItem Header="_Help"/>
         </Menu>
         <StackPanel HorizontalAlignment="Left" Background="#FFF7F7F7" MinWidth="100" Width="123.067">
