@@ -40,7 +40,7 @@ namespace SeamCarving
             businessLogic = new BusinessLogic(ResultsToDisplay);
 
 
-            ResultDataGrid.ItemsSource = ResultsToDisplay;
+            ResultDataGrid.ItemsSource = ResultsToDisplay;            
         }
 
         private void updateSizeDisplay()
@@ -77,6 +77,7 @@ namespace SeamCarving
             businessLogic.SetupSeamCarver(openFileDialog.FileName);
             updateSizeDisplay();
 
+            ResultDataGrid.Items.Refresh();
         }
 
         private void showCarvingOptions()
@@ -109,8 +110,8 @@ namespace SeamCarving
             // for now hard wired to carve horizontally
 
             businessLogic.sH.RemoveNHorizontalSeams(numberOfSeams);
+            ResultDataGrid.Items.Refresh();
 
-            
         }
     }
 }
