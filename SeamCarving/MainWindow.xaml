@@ -32,6 +32,8 @@
             <ToggleButton x:Name="directionButton" Content="horizontally" Click="directionButtonClicked"/>
             <Button x:Name="ApplyCarvingButton" Content="Apply" Margin="0,10,0,0" HorizontalAlignment="Center" Click="clickApplyCarvingButton"/>
         </StackPanel>
+        <DataGrid x:Name="ResultDataGrid" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" VerticalScrollBarVisibility="Auto"/>
         <Image x:Name="ImageControl" VerticalAlignment="Top"/>
+        
     </DockPanel>
 </Window>

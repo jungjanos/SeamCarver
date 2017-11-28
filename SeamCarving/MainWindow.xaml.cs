@@ -25,6 +25,7 @@ namespace SeamCarving
         private System.Windows.Controls.Image image;
         BusinessLogic businessLogic;
         public bool ImageLoaded { set; get; } = false;
+        public List<ResultInfoItem> ResultsToDisplay;
         
         
 
@@ -36,6 +37,40 @@ namespace SeamCarving
 
             var mainWindow = Application.Current.MainWindow;
             mainWindow.SizeToContent = SizeToContent.WidthAndHeight;
+            ResultsToDisplay = new List<ResultInfoItem>();
+
+
+
+
+            ResultDataGrid.ItemsSource = ResultsToDisplay;
+
+
+            //Below out-commented lines are for UI test, can be deleted
+            {
+                ////ResultDataGrid.col
+
+                //ResultInfoItem message1 = new ResultInfoItem { Message = "abrakadabra 1" };
+                //ResultInfoItem message2 = new ResultInfoItem { Message = "2 xxxxxxx" };
+                //ResultsToDisplay.Add(message1);
+                //ResultsToDisplay.Add(message2);
+
+                //ResultInfoItem message3 = new ResultInfoItem { Message = "VV akarmi aaa 3" };
+                //ResultsToDisplay.Add(message3);
+
+                //ResultInfoItem message4 = new ResultInfoItem { Message = "VV akarmi aaa 3" };
+                //ResultInfoItem message5 = new ResultInfoItem { Message = "VV akarmi aaa 3" };
+                //ResultInfoItem message6 = new ResultInfoItem { Message = "VV akarmi aaa 3" };
+                //ResultInfoItem message7 = new ResultInfoItem { Message = "VV akarmi aaa 3" };
+                //ResultInfoItem message8 = new ResultInfoItem { Message = "VV akarmi aaa 3" };
+                //ResultInfoItem message9 = new ResultInfoItem { Message = "VV akarmi aaa 3" };
+
+                //ResultsToDisplay.Add(message4);
+                //ResultsToDisplay.Add(message5);
+                //ResultsToDisplay.Add(message6);
+                //ResultsToDisplay.Add(message7);
+                //ResultsToDisplay.Add(message8);
+                //ResultsToDisplay.Add(message9);
+            }
 
         }
 
