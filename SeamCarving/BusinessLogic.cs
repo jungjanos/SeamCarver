@@ -8,32 +8,28 @@ using System.Threading.Tasks;
 namespace SeamCarving
 {
     public class BusinessLogic
-    {
-        public Bitmap bitmap;
+    {        
         public SeamCarverH sH;
         public bool ImageLoaded { set; get; }
-        private List<ResultInfoItem> messageList;
-        private string fileName;
+        private List<ResultInfoItem> messageList;       
 
 
-        public BusinessLogic() { }
-
-        public BusinessLogic (List<ResultInfoItem> messageList, string fileName) : this()
+        public BusinessLogic()
         {
-            this.messageList = messageList;
-            this.fileName = fileName;
-            this.bitmap = new Bitmap(this.fileName);
-
-            SetupSeamCarver();
+            
         }
 
-        public Size ImageWorkingSize { set; get; }
-
-        public void SetupSeamCarver()
+        public BusinessLogic (List<ResultInfoItem> messageList) : this()
         {
-            sH = new SeamCarverH(bitmap, this.messageList);
-            ImageLoaded = true;
-            ImageWorkingSize = bitmap.Size;
+            this.messageList = messageList;           
+        }
+
+        public Size ImageWorkingSize { set; get; }        
+
+        public void SetupSeamCarver(string fileName)
+        {
+            sH = new SeamCarverH(fileName, this.messageList, this);
+            ImageLoaded = true;            
         }
 
     }

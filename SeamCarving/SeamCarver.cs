@@ -19,17 +19,25 @@ namespace SeamCarving
         private int[] sqr;
         public bool SeamMapSetUp { set; get; }
         private List<ResultInfoItem> messageList;
+        private BusinessLogic parent;
+        private string fileName;
 
 
 
 
-        public SeamCarverH(Bitmap bitmap, List<ResultInfoItem> messageList)
+        public SeamCarverH(string fileName, List<ResultInfoItem> messageList, BusinessLogic parent)
         {
-            SeamMapSetUp = false;
-            this.bitmap = bitmap;
+            SeamMapSetUp = false;            
+
+            this.fileName = fileName;
+            this.bitmap = new Bitmap(this.fileName);
+
             height = this.bitmap.Height;
             width = this.bitmap.Width;
             this.messageList = messageList;
+            this.parent = parent;
+
+            parent.ImageWorkingSize = bitmap.Size;
 
 
             //Setting up square root lookup table
