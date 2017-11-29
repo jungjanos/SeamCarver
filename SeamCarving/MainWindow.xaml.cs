@@ -129,5 +129,10 @@ namespace SeamCarving
             if (ResultDataGrid.Visibility == Visibility.Visible) ResultDataGrid.Visibility = Visibility.Collapsed;
             else ResultDataGrid.Visibility = Visibility.Visible;
         }
+
+        private void clickExitMenu(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

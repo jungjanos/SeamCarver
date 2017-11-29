@@ -14,7 +14,7 @@
                 <MenuItem x:Name="OpenMenu" Header="_Open" Click="clickedFileOpen" />
                 <MenuItem Header="_Save" />
                 <Separator />
-                <MenuItem Header="_Exit" />
+                <MenuItem x:Name="ExitMenu" Header="_Exit" Click="clickExitMenu" />
             </MenuItem>
             <MenuItem Header="_Edit"/>
             <MenuItem Header="_View">
