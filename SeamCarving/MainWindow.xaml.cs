@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using System.Drawing;
 using System.ComponentModel;
 
+
 namespace SeamCarving
 {
     /// <summary>
@@ -74,21 +75,20 @@ namespace SeamCarving
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
             openFileDialog.DefaultExt = ".jpg";
             openFileDialog.Filter = "Image documents (*.bmp;*.png;*.jpeg;*.jpg)|*.bmp;*.png;*.jpeg;*.jpg|All files (*.*)|*.*";
-            openFileDialog.ShowDialog();
-            string fileName = openFileDialog.FileName;
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string fileName = openFileDialog.FileName;
 
+                // Loads the image and displays it             
+                image = new System.Windows.Controls.Image();
+                image.Source = new BitmapImage(new Uri(fileName, UriKind.RelativeOrAbsolute));
+                image.Stretch = Stretch.Uniform;
+                ImageControl.Source = image.Source;
 
-            // Loads the image and displays it             
-            image = new System.Windows.Controls.Image();
-            image.Source = new BitmapImage(new Uri(fileName, UriKind.RelativeOrAbsolute));
-            image.Stretch = Stretch.Uniform;            
-            ImageControl.Source = image.Source;
-
-
-            ResultDataGrid.ItemsSource = null;
-            backgroundWorker1.RunWorkerAsync(fileName);            
-
-            
+                ResultDataGrid.ItemsSource = null;
+                backgroundWorker1.RunWorkerAsync(fileName);
+            }         
+                        
         }
 
         private void backgroundSetupSeamCarver(object sender, DoWorkEventArgs e)
