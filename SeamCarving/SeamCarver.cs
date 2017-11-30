@@ -36,6 +36,7 @@ namespace SeamCarving
             stopwatch = new Stopwatch();
 
 
+
             {
                 stopwatch.Start();
                 this.bitmap = new Bitmap(this.fileName);

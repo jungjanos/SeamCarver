@@ -44,6 +44,8 @@ namespace SeamCarving
 
             ResultDataGrid.ItemsSource = ResultsToDisplay;
 
+            ResultsToDisplay.Add(new ResultInfoItem { Message = "Number of logical processor detected: " + Environment.ProcessorCount });
+
             setupBackgroundWorker();
         }
 
