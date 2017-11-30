@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Drawing;
+using System.ComponentModel;
 
 namespace SeamCarving
 {
@@ -26,8 +27,8 @@ namespace SeamCarving
         BusinessLogic businessLogic;
         public bool ImageLoaded { set; get; } = false;
         public List<ResultInfoItem> ResultsToDisplay;
-        
-        
+
+        private BackgroundWorker backgroundWorker1;
 
 
         public MainWindow()
@@ -40,7 +41,20 @@ namespace SeamCarving
             businessLogic = new BusinessLogic(ResultsToDisplay);
 
 
-            ResultDataGrid.ItemsSource = ResultsToDisplay;            
+            ResultDataGrid.ItemsSource = ResultsToDisplay;
+
+            setupBackgroundWorker();
+        }
+
+        private void setupBackgroundWorker()
+        {
+            backgroundWorker1 = new BackgroundWorker();
+            backgroundWorker1.DoWork +=
+                new DoWorkEventHandler(backgroundSetupSeamCarver);
+
+            backgroundWorker1.RunWorkerCompleted +=
+                new RunWorkerCompletedEventHandler(backgroundSetupSeamCarverCompleted);
+
         }
 
         private void updateSizeDisplay()
@@ -61,23 +75,50 @@ namespace SeamCarving
             openFileDialog.DefaultExt = ".jpg";
             openFileDialog.Filter = "Image documents (*.bmp;*.png;*.jpeg;*.jpg)|*.bmp;*.png;*.jpeg;*.jpg|All files (*.*)|*.*";
             openFileDialog.ShowDialog();
+            string fileName = openFileDialog.FileName;
 
 
             // Loads the image and displays it             
             image = new System.Windows.Controls.Image();
-            image.Source = new BitmapImage(new Uri(openFileDialog.FileName, UriKind.RelativeOrAbsolute));
+            image.Source = new BitmapImage(new Uri(fileName, UriKind.RelativeOrAbsolute));
             image.Stretch = Stretch.Uniform;            
-            ImageControl.Source = image.Source;       
-                                  
-            
-            
-            ImageLoaded = true;
-            showCarvingOptions();
+            ImageControl.Source = image.Source;
 
-            businessLogic.SetupSeamCarver(openFileDialog.FileName);
-            updateSizeDisplay();
 
-            ResultDataGrid.Items.Refresh();
+            ResultDataGrid.ItemsSource = null;
+            backgroundWorker1.RunWorkerAsync(fileName);            
+
+            
+        }
+
+        private void backgroundSetupSeamCarver(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker backgroundWorker = sender as BackgroundWorker;
+            businessLogic.SetupSeamCarver((string)e.Argument);
+        }
+
+        private void backgroundSetupSeamCarverCompleted (object sender, RunWorkerCompletedEventArgs e)
+        {
+            ResultDataGrid.ItemsSource = ResultsToDisplay;
+            if (e.Error != null)
+            {
+                ResultsToDisplay.Add(new ResultInfoItem { Message = "backgroundSetupSeamCarver failed" + e.Error.Message });
+            }
+            else
+            {
+
+                CarveImageLabel.IsEnabled = true;
+                CarveWrapePanel.IsEnabled = true;
+                directionButton.IsEnabled = true;
+                ApplyCarvingButton.IsEnabled = true;
+
+                updateSizeDisplay();
+                ResultDataGrid.Items.Refresh();
+                ImageLoaded = true;
+                showCarvingOptions();
+            }
+
+
         }
 
         private void showCarvingOptions()

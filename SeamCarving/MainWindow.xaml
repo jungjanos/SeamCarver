@@ -26,13 +26,13 @@
             <Label Content="Image size:" FontSize="12" Background="{x:Null}"/>
             <Label x:Name="widthLabel" Content="Width: "/>
             <Label x:Name="heightLabel" Content="Height:"/>
-            <Label x:Name="CarveImageLabel" Content="Carve image by:" FontSize="12"/>
-            <WrapPanel x:Name="CarveWrapePanel" ClipToBounds="True">
+            <Label x:Name="CarveImageLabel" Content="Carve image by:" FontSize="12" IsEnabled="False"/>
+            <WrapPanel x:Name="CarveWrapePanel" ClipToBounds="True" IsEnabled="False">
                 <TextBox x:Name="CarveImageTextBox" Style="{DynamicResource SimpleTextBox}" TextWrapping="Wrap" MinWidth="60" ClipToBounds="True" Width="73.333"/>
                 <Label x:Name="CarveImagePixLabel" Content="pixels" ClipToBounds="True" Width="48.657"/>
             </WrapPanel>
-            <ToggleButton x:Name="directionButton" Content="horizontally" Click="directionButtonClicked"/>
-            <Button x:Name="ApplyCarvingButton" Content="Apply" Margin="0,10,0,0" HorizontalAlignment="Center" Click="clickApplyCarvingButton"/>
+            <ToggleButton x:Name="directionButton" Content="horizontally" Click="directionButtonClicked" IsEnabled="False"/>
+            <Button x:Name="ApplyCarvingButton" Content="Apply" Margin="0,10,0,0" HorizontalAlignment="Center" Click="clickApplyCarvingButton" IsEnabled="False"/>
         </StackPanel>
         <DataGrid x:Name="ResultDataGrid" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" VerticalScrollBarVisibility="Auto"/>
         <Image x:Name="ImageControl" VerticalAlignment="Top"/>
