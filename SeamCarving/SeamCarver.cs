@@ -156,8 +156,8 @@ namespace SeamCarving
             //Calculating the value "energy" of each pixel
             {
                 stopwatch.Start();
-                //calculating the value of non-border pixels (dual gradient function)
-                for (int x = 1; x < width - 1; ++x)
+
+                Parallel.For(1, width - 1, (int x) =>
                 {
                     for (int y = 1; y < height - 1; ++y)
                     {
@@ -174,7 +174,8 @@ namespace SeamCarving
                             //+ sqr[Math.Abs((pixelList[x][y + 1].A - pixelList[x][y - 1].A))]
                             ];
                     }
-                }
+                });
+
                 //filling up corner pixels
                 {
                     //filling corner pixels: top left corner
