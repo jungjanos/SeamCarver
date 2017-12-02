@@ -393,7 +393,7 @@ namespace SeamCarving
             {
                 Message = stopwatch.ElapsedMilliseconds.ToString() +
               "ms" + " - calculateSeamMap() "
-                + width + " X " + height + " dimension seam map, " 
+                + width + " X " + height + " dimension seam map" 
             });
             stopwatch.Reset();
         }
@@ -403,6 +403,7 @@ namespace SeamCarving
             //will store the to be carved horizontal seam
             //indexes of the array are the x coordinates
             //stored elements of the array are the corresponding y coordinates
+            //stopwatch.Start();
             int[] horizontalSeam = new int [width];
             int helper;
             seamMapSetUp();
@@ -448,6 +449,14 @@ namespace SeamCarving
                     }
                 }
             }
+            //stopwatch.Stop();
+            //this.messageList.Add(new ResultInfoItem
+            //{
+            //    Message = stopwatch.ElapsedMilliseconds.ToString() +
+            //  "ms" + " - FindHorizontalSeam() : " + width + " X " +height + " dimension seam map"
+                
+            //});
+            //stopwatch.Reset();
             return horizontalSeam;
         }
 
