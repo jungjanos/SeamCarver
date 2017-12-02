@@ -493,22 +493,34 @@ namespace SeamCarving
         {
 
             //removes the seam from the pixelList, making each column shorter by one element : height -> height-1
-            int helper;
-            for (int x = 0; x < width; ++x)
+            stopwatch.Start();
+
+            Parallel.For(0, width, (int x) =>
             {
-                helper = seam[x];
+                int helper = seam[x];
                 pixelList[x].RemoveAt(helper);
                 valueMap[x].RemoveAt(helper);
-                
+
                 //making saemMap one row shorter calculation cost: width X O(1)
                 seamMap[x].RemoveAt(height - 1);
-            }
-            --height;
-            for (int x =0; x < width; ++x)
+            });
+
+            --height;            
+
+            Parallel.For(0, width, (int x) =>
             {
                 updatePixelValue(x, modKadder(seam[x], -1, height));
                 updatePixelValue(x, modKadder(seam[x], 0, height));
-            }         
+            });
+
+            stopwatch.Stop();
+            this.messageList.Add(new ResultInfoItem
+            {
+                Message = stopwatch.ElapsedMilliseconds.ToString() +
+              "ms" + " - RemoveHorizontalSeam() "
+                + width + " X " + height + " dimension seam map"
+            });
+            stopwatch.Reset();
         }
 
         //This function removes N horizontal seams. At least 4 rows need to remain. If height-N < 4, then
