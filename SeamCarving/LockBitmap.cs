@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace SeamCarving
 {
-    //
+    // this class was copied from:
     // https://www.codeproject.com/Tips/240428/Work-with-bitmap-faster-with-Csharp
     //
 

@@ -11,6 +11,9 @@ namespace SeamCarving
     public class SeamCarverH
     {
         private Bitmap bitmap;
+
+        private LockBitmap lockBitmap;
+
         private List<List<Color>> pixelList;
         private List<List<int>> valueMap;
         private List<List<int>> seamMap;
@@ -36,6 +39,10 @@ namespace SeamCarving
             height = this.bitmap.Height;
             width = this.bitmap.Width;
             parent.ImageWorkingSize = bitmap.Size;
+
+
+            lockBitmap = new LockBitmap(bitmap);
+            lockBitmap.LockBits();
 
             stopwatch.Stop();
             ResultInfoItem resultInfoItem = new ResultInfoItem
@@ -111,7 +118,7 @@ namespace SeamCarving
                 {
                     for (int y = 0; y < height; ++y)
                     {
-                        pixelList[x].Add(bitmap.GetPixel(x, y));
+                        pixelList[x].Add(lockBitmap.GetPixel(x, y));
                     }
                 }
                 stopwatch.Stop();
