@@ -19,13 +19,36 @@ namespace SeamCarving
         private Int16[] sqrtLookup;
         private int[] sqr;
         public bool SeamMapSetUp { set; get; }
+
         private List<ResultInfoItem> messageList;
+        private object messageListLOCK;
+
+
         private BusinessLogic parent;
         private string fileName;
         private Stopwatch stopwatch;
 
 
+        private void loadBitmap (string fileName)
+        {
+            Stopwatch stopwatch =Stopwatch.StartNew();
+            this.bitmap = new Bitmap(this.fileName);
+            height = this.bitmap.Height;
+            width = this.bitmap.Width;
+            parent.ImageWorkingSize = bitmap.Size;
 
+            stopwatch.Stop();
+            ResultInfoItem resultInfoItem = new ResultInfoItem
+            {
+                Message = stopwatch.ElapsedMilliseconds
+                                             .ToString() + "ms" + " - image loaded as " +
+                                             "file from: " + fileName
+            };
+            lock (messageListLOCK)
+            {
+                this.messageList.Add(resultInfoItem);
+            }
+        }
 
         public SeamCarverH(string fileName, List<ResultInfoItem> messageList, BusinessLogic parent)
         {
@@ -33,25 +56,13 @@ namespace SeamCarving
             this.messageList = messageList;
             this.parent = parent;
             this.fileName = fileName;
-            stopwatch = new Stopwatch();
 
+            messageListLOCK = new object();
+            stopwatch = new Stopwatch();           
 
+            Task loadBitmapTask = Task.Factory.StartNew(() => loadBitmap(this.fileName));
 
-            {
-                stopwatch.Start();
-                this.bitmap = new Bitmap(this.fileName);
-                stopwatch.Stop();
-                this.messageList.Add(new ResultInfoItem { Message = 
-                            stopwatch.ElapsedMilliseconds.ToString() +
-                            "ms" + " - image loaded as file from: " + fileName });
-                stopwatch.Reset();
-            }
-
-            height = this.bitmap.Height;
-            width = this.bitmap.Width;
-
-
-            parent.ImageWorkingSize = bitmap.Size;
+                       
 
             //Setting up square root lookup table
             //setting up square lookup table
@@ -75,7 +86,7 @@ namespace SeamCarving
                                     "ms" + " - set up square root and square lookup tables "});
                 stopwatch.Reset();
             }
-
+            loadBitmapTask.Wait();
             // Setting up a multi dimensional pixel list for holding Color values of the pixels
             // pixelList[x][y] == Color value for the pixel with at (x,y) coordinates
             {
