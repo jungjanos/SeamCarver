@@ -302,8 +302,7 @@ namespace SeamCarving
                     Message = stopwatch.ElapsedMilliseconds.ToString() +
                     "ms" + " - calculated the value map for the whole image"});
                 stopwatch.Reset();
-            }
-            //seamMapSetUp();
+            }             
         }      
         
 
@@ -370,6 +369,8 @@ namespace SeamCarving
         {
             //building the seamMap according to the valueMap
             //first column comes directly from the valueMap
+
+            stopwatch.Start();
             for (int y = 0; y < height; ++y)
             {
                 seamMap[0][y] = valueMap[0][y];
@@ -387,6 +388,14 @@ namespace SeamCarving
                 // x, y=height-1 pixel is an "edge case", int.MaxValue is a placeholder for min3(...)
                 seamMap[x][height - 1] = valueMap[x][height - 1] + min3(seamMap[x - 1][height - 2], seamMap[x - 1][height - 1], int.MaxValue);
             }
+            stopwatch.Stop();
+            this.messageList.Add(new ResultInfoItem
+            {
+                Message = stopwatch.ElapsedMilliseconds.ToString() +
+              "ms" + " - calculateSeamMap() "
+                + width + " X " + height + " dimension seam map, " 
+            });
+            stopwatch.Reset();
         }
 
         public int[] FindHorizontalSeam()
