@@ -11,9 +11,7 @@ namespace SeamCarving
     public class SeamCarverH
     {
         private Bitmap bitmap;
-
         private LockBitmap lockBitmap;
-
         private List<List<Color>> pixelList;
         private List<List<int>> valueMap;
         private List<List<int>> seamMap;
@@ -125,7 +123,7 @@ namespace SeamCarving
                 this.messageList.Add(new ResultInfoItem
                 {
                     Message = stopwatch.ElapsedMilliseconds.ToString() +
-                                    "ms" + " - filling the List<List<Color>> matrix width Color values, method: Bitmap.GetPixel(int x, int y)"});
+                                    "ms" + " - filling the List<List<Color>> matrix width Color values, method: LockBitmap.GetPixel(int x, int y)"});
                 stopwatch.Reset();
             }
 
@@ -512,25 +510,29 @@ namespace SeamCarving
         {
            stopwatch.Start();
             Bitmap bitmap = new Bitmap(width, height);
+            LockBitmap lockBitmap = new LockBitmap(bitmap);
+            lockBitmap.LockBits();
+
             for (int x = 0; x < width; ++x)
             {
                 for (int y = 0; y < height; ++y)
                 {
-                    bitmap.SetPixel(x, y, pixelList[x][y]);
+                    lockBitmap.SetPixel(x, y, pixelList[x][y]);
                 }                
             }
+            lockBitmap.UnlockBits();
             bitmap.Save(@"c:\TMP\mod.bmp");
             stopwatch.Stop();
             this.messageList.Add(new ResultInfoItem
             {
                 Message = stopwatch.ElapsedMilliseconds.ToString() +
                 "ms" + " - created and saved to disk the carved out "
-                + width + " X " + height + "image, used methods Bitmap.SetPixel(int x, int y, Color c)"
+                + width + " X " + height + "image, used methods LockBitmap.SetPixel(int x, int y, Color c)"
             });
             stopwatch.Reset();
         }
 
-        public void RemoveVerticalSeam(int[] seam) { }        
+        public void RemoveVerticalSeam(int[] seam) { }       
 
     }
 }
