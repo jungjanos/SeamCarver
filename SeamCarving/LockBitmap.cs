@@ -7,9 +7,10 @@ namespace SeamCarving
 {
     // this class was copied from:
     // https://www.codeproject.com/Tips/240428/Work-with-bitmap-faster-with-Csharp
-    //
+    //and 
+    // https://gist.github.com/tkouba/0b7f8496f1aadcfee2db
 
-    public class LockBitmap
+    public class LockBitmap /*: IDisposable*/
     {
         Bitmap source = null;
         IntPtr Iptr = IntPtr.Zero;
@@ -19,10 +20,14 @@ namespace SeamCarving
         public int Depth { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
+        public int RowSize { get; private set; }
+
+        //public bool IsDisposed { get; private set; }
 
         public LockBitmap(Bitmap source)
         {
             this.source = source;
+            //IsDisposed = false;
         }
 
         /// <summary>
@@ -32,12 +37,12 @@ namespace SeamCarving
         {
             try
             {
+                //if (IsDisposed)
+                //    throw new ObjectDisposedException(typeof(LockBitmap).Name);
+
                 // Get width and height of bitmap
                 Width = source.Width;
                 Height = source.Height;
-
-                // get total locked pixels count
-                int PixelCount = Width * Height;
 
                 // Create rectangle to lock
                 Rectangle rect = new Rectangle(0, 0, Width, Height);
@@ -56,16 +61,25 @@ namespace SeamCarving
                                              source.PixelFormat);
 
                 // create byte array to copy pixel values
-                int step = Depth / 8;
-                Pixels = new byte[PixelCount * step];
+                RowSize = bitmapData.Stride < 0 ? -bitmapData.Stride : bitmapData.Stride;
+                Pixels = new byte[Height * RowSize];
                 Iptr = bitmapData.Scan0;
 
                 // Copy data from pointer to array
-                Marshal.Copy(Iptr, Pixels, 0, Pixels.Length);
+                // Not working for negative Stride see. http://stackoverflow.com/a/10360753/1498252
+                //Marshal.Copy(Iptr, Pixels, 0, Pixels.Length);
+                // Solution for positive and negative Stride:
+                for (int y = 0; y < Height; y++)
+                {
+                    Marshal.Copy(IntPtr.Add(Iptr, y * bitmapData.Stride),
+                        Pixels, y * RowSize,
+                        RowSize);
+                }
+
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -76,15 +90,27 @@ namespace SeamCarving
         {
             try
             {
+                //if (IsDisposed)
+                //    throw new ObjectDisposedException(typeof(LockBitmap).Name);
+                if (bitmapData == null)
+                    throw new InvalidOperationException("Image is not locked.");
+
                 // Copy data from byte array to pointer
-                Marshal.Copy(Pixels, 0, Iptr, Pixels.Length);
+                //Marshal.Copy(Pixels, 0, Iptr, Pixels.Length);
+                for (int y = 0; y < Height; y++)
+                {
+                    Marshal.Copy(Pixels, y * RowSize,
+                        IntPtr.Add(Iptr, y * bitmapData.Stride),
+                        RowSize);
+                }
 
                 // Unlock bitmap data
                 source.UnlockBits(bitmapData);
+                bitmapData = null;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -96,13 +122,16 @@ namespace SeamCarving
         /// <returns></returns>
         public Color GetPixel(int x, int y)
         {
+            //if (IsDisposed)
+            //    throw new ObjectDisposedException(typeof(LockBitmap).Name);
+
             Color clr = Color.Empty;
 
             // Get color components count
             int cCount = Depth / 8;
 
             // Get start index of the specified pixel
-            int i = ((y * Width) + x) * cCount;
+            int i = (y * RowSize) + (x * cCount);
 
             if (i > Pixels.Length - cCount)
                 throw new IndexOutOfRangeException();
@@ -139,11 +168,16 @@ namespace SeamCarving
         /// <param name="color"></param>
         public void SetPixel(int x, int y, Color color)
         {
+            //if (IsDisposed)
+            //    throw new ObjectDisposedException(typeof(LockBitmap).Name);
+
             // Get color components count
             int cCount = Depth / 8;
 
             // Get start index of the specified pixel
-            int i = ((y * Width) + x) * cCount;
+            int i = (y * RowSize) + (x * cCount);
+            if (i > Pixels.Length - cCount)
+                throw new IndexOutOfRangeException();
 
             if (Depth == 32) // For 32 bpp set Red, Green, Blue and Alpha
             {
@@ -164,5 +198,31 @@ namespace SeamCarving
                 Pixels[i] = color.B;
             }
         }
+
+        //#region IDisposable Members
+
+        //~LockBitmap()
+        //{
+        //    Dispose(false);
+        //}
+
+        //public void Dispose()
+        //{
+        //    Dispose(true);
+        //    GC.SuppressFinalize(this);
+        //}
+
+        //private void Dispose(bool disposing)
+        //{
+        //    if (bitmapData != null)
+        //    {
+        //        source.UnlockBits(bitmapData);
+        //        bitmapData = null;
+        //    }
+        //    source = null;
+        //    IsDisposed = true;
+        //}
+
+        //#endregion
     }
 }
