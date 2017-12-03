@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace SeamCarving
 {
@@ -69,12 +70,22 @@ namespace SeamCarving
                 // Not working for negative Stride see. http://stackoverflow.com/a/10360753/1498252
                 //Marshal.Copy(Iptr, Pixels, 0, Pixels.Length);
                 // Solution for positive and negative Stride:
-                for (int y = 0; y < Height; y++)
+
+                // Jung: original code commented out:
+                //for (int y = 0; y < Height; y++)
+                //{
+                //    Marshal.Copy(IntPtr.Add(Iptr, y * bitmapData.Stride),
+                //        Pixels, y * RowSize,
+                //        RowSize);
+                //}
+
+                // Jung: Marginally faster code
+                Parallel.For(0, Height, (int y) =>
                 {
                     Marshal.Copy(IntPtr.Add(Iptr, y * bitmapData.Stride),
                         Pixels, y * RowSize,
                         RowSize);
-                }
+                });
 
             }
             catch (Exception)
