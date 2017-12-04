@@ -112,13 +112,12 @@ namespace SeamCarving
             // filling the multi dimension list with Color values from the BMP file source
             {
                 stopwatch.Start();
-                for (int x = 0; x < width; ++x)
-                {
+                Parallel.For(0, width, (int x) => {
                     for (int y = 0; y < height; ++y)
                     {
                         pixelList[x].Add(lockBitmap.GetPixel(x, y));
                     }
-                }
+                });
                 stopwatch.Stop();
                 this.messageList.Add(new ResultInfoItem
                 {
