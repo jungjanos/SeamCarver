@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Drawing;
 using System.ComponentModel;
+using System.IO;
 
 
 namespace SeamCarving
@@ -28,6 +29,8 @@ namespace SeamCarving
         BusinessLogic businessLogic;
         public bool ImageLoaded { set; get; } = false;
         public List<ResultInfoItem> ResultsToDisplay;
+        private string onlyFileName;
+        private string folderName;
 
         private BackgroundWorker backgroundWorker1;
 
@@ -40,6 +43,9 @@ namespace SeamCarving
             mainWindow.SizeToContent = SizeToContent.WidthAndHeight;
             ResultsToDisplay = new List<ResultInfoItem>();
             businessLogic = new BusinessLogic(ResultsToDisplay);
+
+            onlyFileName = String.Empty;
+            folderName  = String.Empty;
 
 
             ResultDataGrid.ItemsSource = ResultsToDisplay;
@@ -80,6 +86,11 @@ namespace SeamCarving
             if (openFileDialog.ShowDialog() == true)
             {
                 string fileName = openFileDialog.FileName;
+
+                onlyFileName = System.IO.Path.GetFileName(fileName);                
+                StringBuilder sb = new StringBuilder(fileName);
+                folderName = sb.Remove(fileName.Length - onlyFileName.Length, onlyFileName.Length).ToString();
+
 
                 // Loads the image and displays it             
                 image = new System.Windows.Controls.Image();
@@ -176,6 +187,27 @@ namespace SeamCarving
         private void clickExitMenu(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void clickedFileSave(object sender, RoutedEventArgs e)
+        {
+            
+            if (folderName != String.Empty && onlyFileName != String.Empty)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.InitialDirectory = folderName;
+                saveFileDialog.DefaultExt = ".bmp";
+                saveFileDialog.AddExtension = true;
+                saveFileDialog.Filter = "Bitmap image (*.bmp)|*.bmp;|All files (*.*)|*.*";
+                
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    string saveFileFullPath = System.IO.Path.ChangeExtension(saveFileDialog.FileName, ".bmp");
+
+
+                    businessLogic.sH.SaveBitmap(saveFileFullPath);
+                }
+            }
         }
     }
 }

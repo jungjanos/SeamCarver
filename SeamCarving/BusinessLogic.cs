@@ -11,12 +11,11 @@ namespace SeamCarving
     {        
         public SeamCarverH sH;
         public bool ImageLoaded { set; get; }
-        private List<ResultInfoItem> messageList;       
+        private List<ResultInfoItem> messageList;        
 
 
         public BusinessLogic()
-        {
-            
+        {            
         }
 
         public BusinessLogic (List<ResultInfoItem> messageList) : this()

@@ -538,7 +538,34 @@ namespace SeamCarving
 
         public void SaveBitmap()
         {
-           stopwatch.Start();
+            throw new Exception("unmaintained code path");
+           //stopwatch.Start();
+           // Bitmap bitmap = new Bitmap(width, height);
+           // LockBitmap lockBitmap = new LockBitmap(bitmap);
+           // lockBitmap.LockBits();
+
+           // for (int x = 0; x < width; ++x)
+           // {
+           //     for (int y = 0; y < height; ++y)
+           //     {
+           //         lockBitmap.SetPixel(x, y, pixelList[x][y]);
+           //     }                
+           // }
+           // lockBitmap.UnlockBits();
+           // bitmap.Save(@"c:\TMP\mod.bmp");
+           // stopwatch.Stop();
+           // this.messageList.Add(new ResultInfoItem
+           // {
+           //     Message = stopwatch.ElapsedMilliseconds.ToString() +
+           //     "ms" + " - created and saved to disk the carved out "
+           //     + width + " X " + height + "image, used methods LockBitmap.SetPixel(int x, int y, Color c)"
+           // });
+           // stopwatch.Reset();
+        }
+
+        public void SaveBitmap(string fullPath)
+        {
+            stopwatch.Start();
             Bitmap bitmap = new Bitmap(width, height);
             LockBitmap lockBitmap = new LockBitmap(bitmap);
             lockBitmap.LockBits();
@@ -548,10 +575,10 @@ namespace SeamCarving
                 for (int y = 0; y < height; ++y)
                 {
                     lockBitmap.SetPixel(x, y, pixelList[x][y]);
-                }                
+                }
             }
             lockBitmap.UnlockBits();
-            bitmap.Save(@"c:\TMP\mod.bmp");
+            bitmap.Save(fullPath);            
             stopwatch.Stop();
             this.messageList.Add(new ResultInfoItem
             {
@@ -561,6 +588,8 @@ namespace SeamCarving
             });
             stopwatch.Reset();
         }
+
+
 
         public void RemoveVerticalSeam(int[] seam) { }       
 
