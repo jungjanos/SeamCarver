@@ -532,8 +532,7 @@ namespace SeamCarving
                 --rowsToRemove;
 
                 RemoveHorizontalSeam(FindHorizontalSeam());
-            }
-            SaveBitmap();
+            }            
         }
 
         public void SaveBitmap()
