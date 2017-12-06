@@ -192,7 +192,7 @@ namespace SeamCarving
         private void clickedFileSave(object sender, RoutedEventArgs e)
         {
             
-            if (folderName != String.Empty && onlyFileName != String.Empty)
+            if (folderName != String.Empty && onlyFileName != String.Empty && businessLogic.sH != null)
             {
                 SaveFileDialog saveFileDialog = new SaveFileDialog();
                 saveFileDialog.InitialDirectory = folderName;
