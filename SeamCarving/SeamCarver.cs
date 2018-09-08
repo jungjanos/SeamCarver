@@ -24,7 +24,6 @@ namespace SeamCarving
         private List<ResultInfoItem> messageList;
         private object messageListLOCK;
 
-
         private BusinessLogic parent;
         private string fileName;
         private Stopwatch stopwatch;
@@ -587,8 +586,6 @@ namespace SeamCarving
             });
             stopwatch.Reset();
         }
-
-
 
         public void RemoveVerticalSeam(int[] seam) { }       
 
