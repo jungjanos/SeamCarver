@@ -85,9 +85,18 @@ namespace SeamCarving
                 }
 
                 stopwatch.Stop();
-                this.messageList.Add(new ResultInfoItem { Message =
-                                    stopwatch.ElapsedMilliseconds.ToString() +
-                                    "ms" + " - set up square root and square lookup tables "});
+
+                ResultInfoItem resultInfoItem = new ResultInfoItem
+                {
+                    Message =
+                                        stopwatch.ElapsedMilliseconds.ToString() +
+                                        "ms" + " - set up square root and square lookup tables "
+                };
+
+                lock (messageListLOCK)
+                {
+                    this.messageList.Add(resultInfoItem);
+                }
                 stopwatch.Reset();
             }
             loadBitmapTask.Wait();
@@ -101,11 +110,17 @@ namespace SeamCarving
                     pixelList.Add(new List<Color>(height));
                 }
                 stopwatch.Stop();
-                this.messageList.Add(new ResultInfoItem
+
+                ResultInfoItem resultInfoItem = new ResultInfoItem
                 {
                     Message = stopwatch.ElapsedMilliseconds.ToString() +
-                                    "ms" + " - set up " + width + " X " + height + 
-                                    " size List<List<Color>> matrix for holding pixel information"});
+                                    "ms" + " - set up " + width + " X " + height +
+                                    " size List<List<Color>> matrix for holding pixel information"
+                };
+                lock (messageListLOCK)
+                { 
+                    this.messageList.Add(resultInfoItem);
+                }
                 stopwatch.Reset();
             }
             // filling the multi dimension list with Color values from the BMP file source
@@ -118,10 +133,17 @@ namespace SeamCarving
                     }
                 });
                 stopwatch.Stop();
-                this.messageList.Add(new ResultInfoItem
+                ResultInfoItem resultInfoItem = new ResultInfoItem
                 {
                     Message = stopwatch.ElapsedMilliseconds.ToString() +
-                                    "ms" + " - filling the List<List<Color>> matrix width Color values, method: LockBitmap.GetPixel(int x, int y)"});
+                                    "ms" + " - filling the List<List<Color>> matrix width Color values, method: LockBitmap.GetPixel(int x, int y)"
+                };
+
+                lock (messageListLOCK)
+                {
+                    this.messageList.Add(resultInfoItem);
+                }
+                
                 stopwatch.Reset();
             }
 
@@ -142,13 +164,20 @@ namespace SeamCarving
                     }
                 }
                 stopwatch.Stop();
-                this.messageList.Add(new ResultInfoItem
+
+                ResultInfoItem resultInfoItem = new ResultInfoItem
                 {
                     Message = stopwatch.ElapsedMilliseconds.ToString() +
                                     "ms" + " - set up " + width + " X " + height +
-                                    " size List<List<int>> matrix for holding pixel value information"});
-                stopwatch.Reset();
+                                    " size List<List<int>> matrix for holding pixel value information"
+                };
 
+                lock (messageListLOCK)
+                {
+                    this.messageList.Add(resultInfoItem);
+                }
+                
+                stopwatch.Reset();
             }
 
             //Calculating the value "energy" of each pixel
@@ -295,10 +324,18 @@ namespace SeamCarving
                             ];
                 }
                 stopwatch.Stop();
-                this.messageList.Add(new ResultInfoItem
+
+                ResultInfoItem resultInfoItem = new ResultInfoItem
                 {
                     Message = stopwatch.ElapsedMilliseconds.ToString() +
-                    "ms" + " - calculated the value map for the whole image"});
+                    "ms" + " - calculated the value map for the whole image"
+                };
+
+                lock (messageListLOCK)
+                {
+                    this.messageList.Add(resultInfoItem);
+                }
+                
                 stopwatch.Reset();
             }             
         }      
@@ -353,12 +390,21 @@ namespace SeamCarving
                 }
                 SeamMapSetUp = true;
                 stopwatch.Stop();
-                this.messageList.Add(new ResultInfoItem
+
+                ResultInfoItem resultInfoItem = new ResultInfoItem
                 {
                     Message = stopwatch.ElapsedMilliseconds.ToString() +
-                              "ms" + " - initial setup of the " 
-                                + width + " X " +height + " dimension seam map, " +
-                                "seam map was filled with dummy numbers (-1)"});
+                              "ms" + " - initial setup of the "
+                                + width + " X " + height + " dimension seam map, " +
+                                "seam map was filled with dummy numbers (-1)"
+                };
+
+                lock (messageListLOCK)
+                {
+                    this.messageList.Add(resultInfoItem);
+                }
+
+                
                 stopwatch.Reset();
             }
         }
@@ -387,12 +433,19 @@ namespace SeamCarving
                 seamMap[x][height - 1] = valueMap[x][height - 1] + min3(seamMap[x - 1][height - 2], seamMap[x - 1][height - 1], int.MaxValue);
             }
             stopwatch.Stop();
-            this.messageList.Add(new ResultInfoItem
+
+            ResultInfoItem resultInfoItem = new ResultInfoItem
             {
                 Message = stopwatch.ElapsedMilliseconds.ToString() +
               "ms" + " - calculateSeamMap() "
-                + width + " X " + height + " dimension seam map" 
-            });
+                + width + " X " + height + " dimension seam map"
+            };
+
+            lock (messageListLOCK)
+            {
+                this.messageList.Add(resultInfoItem);
+            }
+            
             stopwatch.Reset();
         }
 
@@ -512,12 +565,20 @@ namespace SeamCarving
             });
 
             stopwatch.Stop();
-            this.messageList.Add(new ResultInfoItem
+
+            ResultInfoItem resultInfoItem = new ResultInfoItem
             {
                 Message = stopwatch.ElapsedMilliseconds.ToString() +
               "ms" + " - RemoveHorizontalSeam() "
                 + width + " X " + height + " dimension seam map"
-            });
+            };
+
+            lock (messageListLOCK)
+            {
+                this.messageList.Add(resultInfoItem);
+            }
+
+            
             stopwatch.Reset();
         }
 
@@ -537,28 +598,6 @@ namespace SeamCarving
         public void SaveBitmap()
         {
             throw new Exception("unmaintained code path");
-           //stopwatch.Start();
-           // Bitmap bitmap = new Bitmap(width, height);
-           // LockBitmap lockBitmap = new LockBitmap(bitmap);
-           // lockBitmap.LockBits();
-
-           // for (int x = 0; x < width; ++x)
-           // {
-           //     for (int y = 0; y < height; ++y)
-           //     {
-           //         lockBitmap.SetPixel(x, y, pixelList[x][y]);
-           //     }                
-           // }
-           // lockBitmap.UnlockBits();
-           // bitmap.Save(@"c:\TMP\mod.bmp");
-           // stopwatch.Stop();
-           // this.messageList.Add(new ResultInfoItem
-           // {
-           //     Message = stopwatch.ElapsedMilliseconds.ToString() +
-           //     "ms" + " - created and saved to disk the carved out "
-           //     + width + " X " + height + "image, used methods LockBitmap.SetPixel(int x, int y, Color c)"
-           // });
-           // stopwatch.Reset();
         }
 
         public void SaveBitmap(string fullPath, System.Drawing.Imaging.ImageFormat imageFormat)
@@ -578,12 +617,19 @@ namespace SeamCarving
             lockBitmap.UnlockBits();
             bitmap.Save(fullPath, imageFormat);            
             stopwatch.Stop();
-            this.messageList.Add(new ResultInfoItem
+
+            ResultInfoItem resultInfoItem = new ResultInfoItem
             {
                 Message = stopwatch.ElapsedMilliseconds.ToString() +
                 "ms" + " - created and saved to disk the carved out "
                 + width + " X " + height + "image, used methods LockBitmap.SetPixel(int x, int y, Color c)"
-            });
+            };
+
+            lock (messageListLOCK)
+            {
+                this.messageList.Add(resultInfoItem);
+            }
+            
             stopwatch.Reset();
         }
 
