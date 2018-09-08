@@ -561,7 +561,7 @@ namespace SeamCarving
            // stopwatch.Reset();
         }
 
-        public void SaveBitmap(string fullPath)
+        public void SaveBitmap(string fullPath, System.Drawing.Imaging.ImageFormat imageFormat)
         {
             stopwatch.Start();
             Bitmap bitmap = new Bitmap(width, height);
@@ -576,7 +576,7 @@ namespace SeamCarving
                 }
             }
             lockBitmap.UnlockBits();
-            bitmap.Save(fullPath);            
+            bitmap.Save(fullPath, imageFormat);            
             stopwatch.Stop();
             this.messageList.Add(new ResultInfoItem
             {

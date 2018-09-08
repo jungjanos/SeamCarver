@@ -196,16 +196,23 @@ namespace SeamCarving
             {
                 SaveFileDialog saveFileDialog = new SaveFileDialog();
                 saveFileDialog.InitialDirectory = folderName;
-                saveFileDialog.DefaultExt = ".bmp";
+                saveFileDialog.DefaultExt = ".jpeg";
+                System.Drawing.Imaging.ImageFormat imageFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
                 saveFileDialog.AddExtension = true;
-                saveFileDialog.Filter = "Bitmap image (*.bmp)|*.bmp;|All files (*.*)|*.*";
+                saveFileDialog.Filter = "JPEG image (*.jpeg)|*.jpeg;|Bitmap image (*.bmp)|*.bmp;|PNG image (*.png)|*.png;|GIF image (*.gif)|*.gif;|All files (*.*)|*.*";
                 
                 if (saveFileDialog.ShowDialog() == true)
                 {
-                    string saveFileFullPath = System.IO.Path.ChangeExtension(saveFileDialog.FileName, ".bmp");
+                    string saveFileExtension = System.IO.Path.GetExtension(saveFileDialog.FileName);                    
+                    
+                    switch (saveFileExtension)
+                    {
+                        case ".bmp": imageFormat = System.Drawing.Imaging.ImageFormat.Bmp; break;
+                        case ".png": imageFormat = System.Drawing.Imaging.ImageFormat.Png; break;
+                        case ".gif": imageFormat = System.Drawing.Imaging.ImageFormat.Gif; break;
+                    }
 
-
-                    businessLogic.sH.SaveBitmap(saveFileFullPath);
+                    businessLogic.sH.SaveBitmap(saveFileDialog.FileName, imageFormat);
                 }
             }
         }
