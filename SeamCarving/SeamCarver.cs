@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -600,8 +601,26 @@ namespace SeamCarving
             throw new Exception("unmaintained code path");
         }
 
-        public void SaveBitmap(string fullPath, System.Drawing.Imaging.ImageFormat imageFormat)
+        public void SaveBitmap(string fullPath, ImageFormat imageFormat, long jpegQualityLevel)
         {
+
+            void SaveAsJpeg(Bitmap image, long quality)
+            {
+                var encoders = ImageCodecInfo.GetImageEncoders();
+                ImageCodecInfo jpegEncoder = encoders.First(x => x.FormatDescription.Contains("JPEG"));
+
+                System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
+                EncoderParameters myEncoderParameters = new EncoderParameters(1);
+
+                EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, quality);
+                myEncoderParameters.Param[0] = myEncoderParameter;
+
+                image.Save(fullPath, jpegEncoder, myEncoderParameters);
+            }
+
+            bool saved = false;
+
+
             stopwatch.Start();
             Bitmap bitmap = new Bitmap(width, height);
             LockBitmap lockBitmap = new LockBitmap(bitmap);
@@ -615,7 +634,18 @@ namespace SeamCarving
                 }
             }
             lockBitmap.UnlockBits();
-            bitmap.Save(fullPath, imageFormat);            
+
+            if (!saved && (imageFormat == ImageFormat.Jpeg))
+            {
+                SaveAsJpeg(bitmap, jpegQualityLevel);
+                saved = true;
+            }
+
+            if (!saved)
+            {
+                bitmap.Save(fullPath, imageFormat);
+                saved = true;
+            }
             stopwatch.Stop();
 
             ResultInfoItem resultInfoItem = new ResultInfoItem

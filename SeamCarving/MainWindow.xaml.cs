@@ -32,6 +32,12 @@ namespace SeamCarving
         private string onlyFileName;
         private string folderName;
 
+        //determines the quality of BMP -> JPEG compression when saving an image
+        //least compression == 100L
+        //max compression == 0L
+        //currently hard wired, should be implemented as UI control
+        private long jpegQualityLevel = 100L;
+
         private BackgroundWorker backgroundWorker1;
 
 
@@ -213,7 +219,7 @@ namespace SeamCarving
                         case ".gif": imageFormat = System.Drawing.Imaging.ImageFormat.Gif; break;
                     }
 
-                    businessLogic.sH.SaveBitmap(saveFileDialog.FileName, imageFormat);
+                    businessLogic.sH.SaveBitmap(saveFileDialog.FileName, imageFormat, jpegQualityLevel);
                 }
                 ResultDataGrid.Items.Refresh();
             }            
