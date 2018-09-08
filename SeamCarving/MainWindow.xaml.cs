@@ -116,6 +116,7 @@ namespace SeamCarving
             if (e.Error != null)
             {
                 ResultsToDisplay.Add(new ResultInfoItem { Message = "backgroundSetupSeamCarver failed" + e.Error.Message });
+                ResultDataGrid.Items.Refresh();
             }
             else
             {
@@ -214,7 +215,8 @@ namespace SeamCarving
 
                     businessLogic.sH.SaveBitmap(saveFileDialog.FileName, imageFormat);
                 }
-            }
+                ResultDataGrid.Items.Refresh();
+            }            
         }
     }
 }
