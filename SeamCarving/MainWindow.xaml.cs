@@ -99,15 +99,15 @@ namespace SeamCarving
                 folderName = sb.Remove(fileName.Length - onlyFileName.Length, onlyFileName.Length).ToString();
 
 
-                // Loads the image and displays it                                   
-
-                //old
-                //ImageControl.Source = new BitmapImage(new Uri(fileName, UriKind.RelativeOrAbsolute));                
+                // Loads the image and displays it                                                 
 
                 //Bitmap is loaded from file and packaged in WPF friendly format
                 imageToDisplay = new Bitmap(fileName);
+                ImageControl.Width = imageToDisplay.Width;
+                ImageControl.Height = imageToDisplay.Height;
                 ImageControl.Source = Tools.BitmapToImageSource(imageToDisplay);
 
+                
                 ResultDataGrid.ItemsSource = null;
 
                 backgroundWorker1.RunWorkerAsync(imageToDisplay);
