@@ -25,9 +25,9 @@ namespace SeamCarving
 
         public Size ImageWorkingSize { set; get; }        
 
-        public void SetupSeamCarver(string fileName)
+        public void SetupSeamCarver(Bitmap bitmap)
         {
-            sH = new SeamCarverH(fileName, this.messageList, this);
+            sH = new SeamCarverH(bitmap, this.messageList, this);
             ImageLoaded = true;            
         }
 

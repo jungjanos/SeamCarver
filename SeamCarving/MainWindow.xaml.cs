@@ -104,11 +104,13 @@ namespace SeamCarving
                 //old
                 //ImageControl.Source = new BitmapImage(new Uri(fileName, UriKind.RelativeOrAbsolute));                
 
+                //Bitmap is loaded from file and packaged in WPF friendly format
                 imageToDisplay = new Bitmap(fileName);
                 ImageControl.Source = Tools.BitmapToImageSource(imageToDisplay);
 
                 ResultDataGrid.ItemsSource = null;
-                backgroundWorker1.RunWorkerAsync(fileName);
+
+                backgroundWorker1.RunWorkerAsync(imageToDisplay);
             }         
                         
         }
@@ -116,7 +118,7 @@ namespace SeamCarving
         private void backgroundSetupSeamCarver(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker backgroundWorker = sender as BackgroundWorker;
-            businessLogic.SetupSeamCarver((string)e.Argument);
+            businessLogic.SetupSeamCarver((Bitmap)e.Argument);
         }
 
         private void backgroundSetupSeamCarverCompleted (object sender, RunWorkerCompletedEventArgs e)

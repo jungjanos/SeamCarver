@@ -25,15 +25,14 @@ namespace SeamCarving
         private List<ResultInfoItem> messageList;
         private object messageListLOCK;
 
-        private BusinessLogic parent;
-        private string fileName;
+        private BusinessLogic parent;        
         private Stopwatch stopwatch;
 
 
-        private void loadBitmap (string fileName)
+        private void loadBitmap (Bitmap image)
         {
             Stopwatch stopwatch =Stopwatch.StartNew();
-            this.bitmap = new Bitmap(this.fileName);
+            this.bitmap = (Bitmap)image.Clone();
             height = this.bitmap.Height;
             width = this.bitmap.Width;
             parent.ImageWorkingSize = bitmap.Size;
@@ -46,8 +45,7 @@ namespace SeamCarving
             ResultInfoItem resultInfoItem = new ResultInfoItem
             {
                 Message = stopwatch.ElapsedMilliseconds
-                                             .ToString() + "ms" + " - image loaded as " +
-                                             "file from: " + fileName
+                                             .ToString() + "ms" + " - image loaded"
             };
             lock (messageListLOCK)
             {
@@ -55,17 +53,18 @@ namespace SeamCarving
             }
         }
 
-        public SeamCarverH(string fileName, List<ResultInfoItem> messageList, BusinessLogic parent)
+        public SeamCarverH(Bitmap image, List<ResultInfoItem> messageList, BusinessLogic parent)
         {
             SeamMapSetUp = false;
             this.messageList = messageList;
             this.parent = parent;
-            this.fileName = fileName;
+            
+            
 
             messageListLOCK = new object();
             stopwatch = new Stopwatch();           
 
-            Task loadBitmapTask = Task.Factory.StartNew(() => loadBitmap(this.fileName));
+            Task loadBitmapTask = Task.Factory.StartNew(() => loadBitmap(image));
 
                        
 
