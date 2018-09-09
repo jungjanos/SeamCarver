@@ -32,7 +32,8 @@ namespace SeamCarving
         private void loadBitmap (Bitmap image)
         {
             Stopwatch stopwatch =Stopwatch.StartNew();
-            this.bitmap = (Bitmap)image.Clone();
+            //this.bitmap = (Bitmap)image.Clone();
+            this.bitmap = image;
             height = this.bitmap.Height;
             width = this.bitmap.Width;
             parent.ImageWorkingSize = bitmap.Size;
@@ -338,14 +339,13 @@ namespace SeamCarving
                 
                 stopwatch.Reset();
             }             
-        }      
+        }    
         
 
         public int PixelValue(int x, int y)
         {
             return valueMap[x][y];
         }
-
 
 
         //returns the smallest of its arguments, if two are equal and both minimum, 
@@ -577,14 +577,13 @@ namespace SeamCarving
             {
                 this.messageList.Add(resultInfoItem);
             }
-
             
             stopwatch.Reset();
         }
 
         //This function removes N horizontal seams. At least 4 rows need to remain. If height-N < 4, then
         //height-4 rows are removed
-        public void RemoveNHorizontalSeams(int n)
+        public Bitmap RemoveNHorizontalSeams(int n)
         {
             int rowsToRemove = Math.Min(n, height - 4);
             while (rowsToRemove > 0)
@@ -592,7 +591,21 @@ namespace SeamCarving
                 --rowsToRemove;
 
                 RemoveHorizontalSeam(FindHorizontalSeam());
-            }            
+            }
+            Bitmap result = new Bitmap(width, height);
+            LockBitmap lockBitmap = new LockBitmap(result);
+            lockBitmap.LockBits();
+
+            for (int x = 0; x < width; ++x)
+            {
+                for (int y = 0; y < height; ++y)
+                {
+                    lockBitmap.SetPixel(x, y, pixelList[x][y]);
+                }
+            }
+            lockBitmap.UnlockBits();
+            return result;
+
         }
 
         public void SaveBitmap()

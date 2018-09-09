@@ -175,7 +175,10 @@ namespace SeamCarving
 
             // for now hard wired to carve horizontally
 
-            businessLogic.sH.RemoveNHorizontalSeams(numberOfSeams);
+            Bitmap newImage = businessLogic.sH.RemoveNHorizontalSeams(numberOfSeams);
+            ImageControl.Source = Tools.BitmapToImageSource( newImage);
+            imageToDisplay = newImage;
+            
             ResultDataGrid.Items.Refresh();
 
         }

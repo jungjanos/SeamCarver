@@ -18,7 +18,7 @@
             </MenuItem>
             <MenuItem Header="_Edit"/>
             <MenuItem Header="_View">
-                <MenuItem x:Name="ShowMessages" Header="Show messages" IsCheckable="True" IsChecked="True" Unchecked="uncheckedShowMessages" Checked="checkedShowMessages" Click="clickedShowMessages"/>
+                <MenuItem x:Name="ShowMessages" Header="Show messages" IsCheckable="True" IsChecked="False" Unchecked="uncheckedShowMessages" Checked="checkedShowMessages" Click="clickedShowMessages"/>
             </MenuItem>
             <MenuItem Header="_Help"/>
         </Menu>
