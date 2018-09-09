@@ -24,13 +24,13 @@ namespace SeamCarving
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {
-        private System.Windows.Controls.Image image;
+    {        
         BusinessLogic businessLogic;
         public bool ImageLoaded { set; get; } = false;
         public List<ResultInfoItem> ResultsToDisplay;
         private string onlyFileName;
         private string folderName;
+        
 
         //determines the quality of BMP -> JPEG compression when saving an image
         //least compression == 100L
@@ -48,7 +48,7 @@ namespace SeamCarving
             var mainWindow = Application.Current.MainWindow;
             mainWindow.SizeToContent = SizeToContent.WidthAndHeight;
             ResultsToDisplay = new List<ResultInfoItem>();
-            businessLogic = new BusinessLogic(ResultsToDisplay);
+            businessLogic = new BusinessLogic(ResultsToDisplay);            
 
             onlyFileName = String.Empty;
             folderName  = String.Empty;
@@ -98,11 +98,8 @@ namespace SeamCarving
                 folderName = sb.Remove(fileName.Length - onlyFileName.Length, onlyFileName.Length).ToString();
 
 
-                // Loads the image and displays it             
-                image = new System.Windows.Controls.Image();
-                image.Source = new BitmapImage(new Uri(fileName, UriKind.RelativeOrAbsolute));
-                image.Stretch = Stretch.Uniform;
-                ImageControl.Source = image.Source;
+                // Loads the image and displays it                                   
+                ImageControl.Source = new BitmapImage(new Uri(fileName, UriKind.RelativeOrAbsolute));                
 
                 ResultDataGrid.ItemsSource = null;
                 backgroundWorker1.RunWorkerAsync(fileName);
