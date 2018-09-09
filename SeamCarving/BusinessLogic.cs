@@ -11,8 +11,8 @@ namespace SeamCarving
     {        
         public SeamCarverH sH;
         public bool ImageLoaded { set; get; }
-        private List<ResultInfoItem> messageList;        
-
+        private List<ResultInfoItem> messageList;
+        public Size ImageWorkingSize { set; get; }
 
         public BusinessLogic()
         {            
@@ -21,9 +21,7 @@ namespace SeamCarving
         public BusinessLogic (List<ResultInfoItem> messageList) : this()
         {
             this.messageList = messageList;           
-        }
-
-        public Size ImageWorkingSize { set; get; }        
+        }                
 
         public void SetupSeamCarver(Bitmap bitmap)
         {

@@ -592,6 +592,10 @@ namespace SeamCarving
 
                 RemoveHorizontalSeam(FindHorizontalSeam());
             }
+            //parent.ImageWorkingSize.Height = height;
+            Size newSize = new Size { Width = width, Height = height };
+            parent.ImageWorkingSize = newSize;
+
             Bitmap result = new Bitmap(width, height);
             LockBitmap lockBitmap = new LockBitmap(result);
             lockBitmap.LockBits();

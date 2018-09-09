@@ -178,7 +178,7 @@ namespace SeamCarving
             Bitmap newImage = businessLogic.sH.RemoveNHorizontalSeams(numberOfSeams);
             ImageControl.Source = Tools.BitmapToImageSource( newImage);
             imageToDisplay = newImage;
-            
+            updateSizeDisplay();
             ResultDataGrid.Items.Refresh();
 
         }
