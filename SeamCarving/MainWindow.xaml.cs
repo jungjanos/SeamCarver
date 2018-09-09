@@ -30,6 +30,7 @@ namespace SeamCarving
         public List<ResultInfoItem> ResultsToDisplay;
         private string onlyFileName;
         private string folderName;
+        private Bitmap imageToDisplay;
         
 
         //determines the quality of BMP -> JPEG compression when saving an image
@@ -99,7 +100,12 @@ namespace SeamCarving
 
 
                 // Loads the image and displays it                                   
-                ImageControl.Source = new BitmapImage(new Uri(fileName, UriKind.RelativeOrAbsolute));                
+
+                //old
+                //ImageControl.Source = new BitmapImage(new Uri(fileName, UriKind.RelativeOrAbsolute));                
+
+                imageToDisplay = new Bitmap(fileName);
+                ImageControl.Source = Tools.BitmapToImageSource(imageToDisplay);
 
                 ResultDataGrid.ItemsSource = null;
                 backgroundWorker1.RunWorkerAsync(fileName);

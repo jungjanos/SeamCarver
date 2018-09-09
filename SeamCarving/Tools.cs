@@ -11,7 +11,7 @@ namespace SeamCarving
 {
     class Tools
     {
-        static BitmapImage BitmapToImageSource(Bitmap bitmap)
+        public static BitmapImage BitmapToImageSource(Bitmap bitmap)
         {
             using (MemoryStream memory = new MemoryStream())
             {
