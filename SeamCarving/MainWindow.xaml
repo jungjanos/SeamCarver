@@ -36,8 +36,8 @@
             <StackPanel Margin="0,20,0,0">
                 <DataGrid x:Name="savedImagesDG" AutoGenerateColumns="False">
                     <DataGrid.Columns>
-                        <DataGridTextColumn x:Name="imageDGcolumn" Header="Image" Binding="{Binding OriginalFilename}"/>
-                        <DataGridTextColumn x:Name="timeDGcolumn" Header="Time" Binding="{Binding CreationTime, StringFormat=hh:mm:ss}"/>
+                        <DataGridTextColumn x:Name="imageDGcolumn" Header="Image" Binding="{Binding OriginalFilename}" IsReadOnly="True"/>
+                        <DataGridTextColumn x:Name="timeDGcolumn" Header="Time" Binding="{Binding CreationTime, StringFormat=hh:mm:ss}" IsReadOnly="True"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>
