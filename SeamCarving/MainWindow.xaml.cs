@@ -63,6 +63,9 @@ namespace SeamCarving
 
 
             ResultDataGrid.ItemsSource = ResultsToDisplay;
+            savedImagesDG.ItemsSource = temporarySaveFiles;
+            
+
 
             ResultsToDisplay.Add(new ResultInfoItem { Message = "Number of logical processor detected: " + Environment.ProcessorCount });
             ResultDataGrid.Items.Refresh();
@@ -191,6 +194,7 @@ namespace SeamCarving
             imageToDisplay = newImage;
             updateSizeDisplay();
             ResultDataGrid.Items.Refresh();
+            savedImagesDG.Items.Refresh();
 
         }
 

@@ -25,6 +25,7 @@ namespace SeamCarving
             SavedImageSize = bitmap.Size;
             CreationTime = DateTime.Now;
             SaveFileGuid = Guid.NewGuid();
+            OriginalFilename = originalFileName;
 
             if (customSavePath == String.Empty)
             {
