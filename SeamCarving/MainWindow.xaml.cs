@@ -31,7 +31,10 @@ namespace SeamCarving
         private string onlyFileName;
         private string folderName;
         private Bitmap imageToDisplay;
-        
+        private string applicationName;
+        private List<SaveFileCatalogEntry> temporarySaveFiles;
+        private string customSavePath = String.Empty;
+
 
         //determines the quality of BMP -> JPEG compression when saving an image
         //least compression == 100L
@@ -49,7 +52,11 @@ namespace SeamCarving
             var mainWindow = Application.Current.MainWindow;
             mainWindow.SizeToContent = SizeToContent.WidthAndHeight;
             ResultsToDisplay = new List<ResultInfoItem>();
-            businessLogic = new BusinessLogic(ResultsToDisplay);            
+            businessLogic = new BusinessLogic(ResultsToDisplay);
+            // Gets application name without folder path and extension
+            // will serve as tempfolder subdirectory to store temp files
+            applicationName = System.IO.Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+            temporarySaveFiles = new List<SaveFileCatalogEntry>();
 
             onlyFileName = String.Empty;
             folderName  = String.Empty;
@@ -58,7 +65,7 @@ namespace SeamCarving
             ResultDataGrid.ItemsSource = ResultsToDisplay;
 
             ResultsToDisplay.Add(new ResultInfoItem { Message = "Number of logical processor detected: " + Environment.ProcessorCount });
-
+            ResultDataGrid.Items.Refresh();
             setupBackgroundWorker();
         }
 
@@ -177,6 +184,10 @@ namespace SeamCarving
 
             Bitmap newImage = businessLogic.sH.RemoveNHorizontalSeams(numberOfSeams);
             ImageControl.Source = Tools.BitmapToImageSource( newImage);
+            SaveFileCatalogEntry entry;
+            temporarySaveFiles.Add(entry = new SaveFileCatalogEntry(newImage, customSavePath, System.IO.Path.GetFileNameWithoutExtension(onlyFileName), businessLogic.ImageOriginalSize, applicationName  ));
+            ResultsToDisplay.Add(new ResultInfoItem { Message = "Temporary save file created: " + entry.FilePath });
+
             imageToDisplay = newImage;
             updateSizeDisplay();
             ResultDataGrid.Items.Refresh();
@@ -197,6 +208,7 @@ namespace SeamCarving
         {
             if (ResultDataGrid.Visibility == Visibility.Visible) ResultDataGrid.Visibility = Visibility.Collapsed;
             else ResultDataGrid.Visibility = Visibility.Visible;
+            
         }
 
         private void clickExitMenu(object sender, RoutedEventArgs e)
@@ -232,5 +244,28 @@ namespace SeamCarving
                 ResultDataGrid.Items.Refresh();
             }            
         }
+
+        private void onClosed(object sender, EventArgs e)
+        {
+            string tempDir;
+
+            if (customSavePath == string.Empty)
+            {
+                tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), applicationName);
+
+               foreach (string filepath in Directory.GetFiles(tempDir))
+               {
+                    File.Delete(filepath);
+               }
+                Directory.Delete(tempDir);
+            }
+            else
+            {
+                throw new NotImplementedException("onClosed(): deleting custom temporary save directory not yet implemented");
+            }
+        }
+
+
+
     }
 }
