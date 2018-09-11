@@ -61,10 +61,8 @@ namespace SeamCarving
             onlyFileName = String.Empty;
             folderName  = String.Empty;
 
-
             ResultDataGrid.ItemsSource = ResultsToDisplay;
-            savedImagesDG.ItemsSource = temporarySaveFiles;
-            
+            savedImagesDG.ItemsSource = temporarySaveFiles;            
 
 
             ResultsToDisplay.Add(new ResultInfoItem { Message = "Number of logical processor detected: " + Environment.ProcessorCount });
@@ -99,17 +97,17 @@ namespace SeamCarving
             widthLabel.Content = "Width: " + bitmap.Width + "pixels";
             heightLabel.Content = "Height: " + bitmap.Height + "pixels";
         }
-        private void displayImage(string path)
+        private Bitmap displayImage(string path)
         {
             Bitmap bitmap = new Bitmap(path);
             displayImage(bitmap);
+            return bitmap;
         }
 
 
 
         private void clickedFileOpen(object sender, RoutedEventArgs e)
         {
-
             // Displays an Open File Dialog to load an image for display and edit              
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
@@ -118,26 +116,25 @@ namespace SeamCarving
             if (openFileDialog.ShowDialog() == true)
             {
                 string fileName = openFileDialog.FileName;
-
                 onlyFileName = System.IO.Path.GetFileName(fileName);                
                 StringBuilder sb = new StringBuilder(fileName);
+
+                // TODO check whether this line can be removed (any references to folderName?)
                 folderName = sb.Remove(fileName.Length - onlyFileName.Length, onlyFileName.Length).ToString();
+                                
 
-
-                // Loads the image and displays it                                                 
-
-                //Bitmap is loaded from file and packaged in WPF friendly format
-                imageToDisplay = new Bitmap(fileName);
+                // Loads the image and displays it                                                           
+                imageToDisplay = displayImage(fileName);
                 ImageControl.Width = imageToDisplay.Width;
                 ImageControl.Height = imageToDisplay.Height;
-                ImageControl.Source = Tools.BitmapToImageSource(imageToDisplay);
 
-                
+                temporarySave(temporarySaveFiles, imageToDisplay, customSavePath, System.IO.Path.GetFileNameWithoutExtension(onlyFileName), imageToDisplay.Size, applicationName);
+
+                // TODO : ugly !!!!!!
+                // remark: ResultDataGrid is updated from code behind by assynchronous methods
                 ResultDataGrid.ItemsSource = null;
-
                 backgroundWorker1.RunWorkerAsync(imageToDisplay);
-            }         
-                        
+            }                                 
         }
 
         private void backgroundSetupSeamCarver(object sender, DoWorkEventArgs e)
@@ -198,19 +195,28 @@ namespace SeamCarving
         {
             int numberOfSeams = int.Parse(CarveImageTextBox.Text);
 
-            // for now hard wired to carve horizontally
+            // for now hard wired to carve horizontally, automatically calls the horizontal carver
 
+            //carves image and immediatelly displays the result
             Bitmap newImage = businessLogic.sH.RemoveNHorizontalSeams(numberOfSeams);
-            ImageControl.Source = Tools.BitmapToImageSource( newImage);
-            SaveFileCatalogEntry entry;
-            temporarySaveFiles.Add(entry = new SaveFileCatalogEntry(newImage, customSavePath, System.IO.Path.GetFileNameWithoutExtension(onlyFileName), businessLogic.ImageOriginalSize, applicationName  ));
-            ResultsToDisplay.Add(new ResultInfoItem { Message = "Temporary save file created: " + entry.FilePath });
+            ImageControl.Source = Tools.BitmapToImageSource(newImage);
 
+            // TODO : check wherter this line makes any sense
             imageToDisplay = newImage;
-            updateSizeDisplay();
+            updateSizeDisplay();            
+
+            // after every finished carving step we create a temporary save file
+            temporarySave(temporarySaveFiles, newImage, customSavePath, System.IO.Path.GetFileNameWithoutExtension(onlyFileName), businessLogic.ImageOriginalSize, applicationName);        
+
+        }
+
+        private void temporarySave(List<SaveFileCatalogEntry> saveFileCatalogEntries, Bitmap bitmap, string customSavePath, string originalFileName, System.Drawing.Size originalImageSize, string applicationName)
+        {
+            SaveFileCatalogEntry entryToAdd = new SaveFileCatalogEntry(bitmap, customSavePath, originalFileName, originalImageSize, applicationName);
+            saveFileCatalogEntries.Add(entryToAdd);
+            ResultsToDisplay.Add(new ResultInfoItem { Message = "Temporary save file created: " + entryToAdd.FilePath });
             ResultDataGrid.Items.Refresh();
             savedImagesDG.Items.Refresh();
-
         }
 
         private void uncheckedShowMessages(object sender, RoutedEventArgs e)
