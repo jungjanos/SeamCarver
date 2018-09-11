@@ -18,8 +18,7 @@ namespace SeamCarving
         private List<List<int>> seamMap;
         private int height;
         private int width;
-
-        // TODO change Int16 to short
+        
         private Int16[] sqrtLookup;
         private int[] sqr;
         public bool SeamMapSetUp { set; get; }
@@ -592,7 +591,6 @@ namespace SeamCarving
             while (rowsToRemove > 0)
             {
                 --rowsToRemove;
-
                 RemoveHorizontalSeam(FindHorizontalSeam());
             }
             //parent.ImageWorkingSize.Height = height;
@@ -612,7 +610,6 @@ namespace SeamCarving
             }
             lockBitmap.UnlockBits();
             return result;
-
         }
 
         public void SaveBitmap()
@@ -638,7 +635,6 @@ namespace SeamCarving
             }
 
             bool saved = false;
-
 
             stopwatch.Start();
             Bitmap bitmap = new Bitmap(width, height);

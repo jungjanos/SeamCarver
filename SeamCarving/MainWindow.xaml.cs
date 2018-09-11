@@ -30,7 +30,10 @@ namespace SeamCarving
         public List<ResultInfoItem> ResultsToDisplay;
         private string onlyFileName;
         private string folderName;
-        private Bitmap imageToDisplay;
+        
+        //this is not necessariliy the image the user is currently working on
+        //(think viewing past results from the temporary saved file list)
+        private Bitmap currentlyDisplayedImage;
         private string applicationName;
         private List<SaveFileCatalogEntry> temporarySaveFiles;
         private string customSavePath = String.Empty;
@@ -81,21 +84,12 @@ namespace SeamCarving
 
         }
 
-        // TODO refactor this part to be in line with displayImage
-        private void updateSizeDisplay()
-        {
-            if (businessLogic.ImageWorkingSize.IsEmpty == false)
-            {
-                widthLabel.Content = "Width: " + businessLogic.ImageWorkingSize.Width + "pixels";
-                heightLabel.Content = "Height: " + businessLogic.ImageWorkingSize.Height + "pixels";
-            }
-        }
-
         private void displayImage(Bitmap bitmap)
         {
             ImageControl.Source = Tools.BitmapToImageSource(bitmap);
             widthLabel.Content = "Width: " + bitmap.Width + "pixels";
             heightLabel.Content = "Height: " + bitmap.Height + "pixels";
+            currentlyDisplayedImage = bitmap;
         }
         private Bitmap displayImage(string path)
         {
@@ -117,23 +111,21 @@ namespace SeamCarving
             {
                 string fileName = openFileDialog.FileName;
                 onlyFileName = System.IO.Path.GetFileName(fileName);                
-                StringBuilder sb = new StringBuilder(fileName);
+                StringBuilder sb = new StringBuilder(fileName);                
+                folderName = sb.Remove(fileName.Length - onlyFileName.Length, onlyFileName.Length).ToString();                                
 
-                // TODO check whether this line can be removed (any references to folderName?)
-                folderName = sb.Remove(fileName.Length - onlyFileName.Length, onlyFileName.Length).ToString();
-                                
+                // Loads the image and displays it
+                Bitmap imageOpened = displayImage(fileName);                
+                ImageControl.Width = imageOpened.Width;
+                ImageControl.Height = imageOpened.Height;
 
-                // Loads the image and displays it                                                           
-                imageToDisplay = displayImage(fileName);
-                ImageControl.Width = imageToDisplay.Width;
-                ImageControl.Height = imageToDisplay.Height;
-
-                temporarySave(temporarySaveFiles, imageToDisplay, customSavePath, System.IO.Path.GetFileNameWithoutExtension(onlyFileName), imageToDisplay.Size, applicationName);
+                // makes a save file from the loaded original image
+                temporarySave(temporarySaveFiles, imageOpened, customSavePath, System.IO.Path.GetFileNameWithoutExtension(onlyFileName), imageOpened.Size, applicationName);
 
                 // TODO : ugly !!!!!!
                 // remark: ResultDataGrid is updated from code behind by assynchronous methods
                 ResultDataGrid.ItemsSource = null;
-                backgroundWorker1.RunWorkerAsync(imageToDisplay);
+                backgroundWorker1.RunWorkerAsync(imageOpened);
             }                                 
         }
 
@@ -157,9 +149,10 @@ namespace SeamCarving
                 CarveImageLabel.IsEnabled = true;
                 CarveWrapePanel.IsEnabled = true;
                 directionButton.IsEnabled = true;
-                ApplyCarvingButton.IsEnabled = true;
+                ApplyCarvingButton.IsEnabled = true;            
 
-                updateSizeDisplay();
+                // TODO : Refresh() not really needed, investigate whether to remove
+                // bug: if sorting is ised on DataGrid column header then the DataGrid does not get automatically updated anymore
                 ResultDataGrid.Items.Refresh();
                 ImageLoaded = true;
                 showCarvingOptions();
@@ -193,17 +186,16 @@ namespace SeamCarving
 
         private void clickApplyCarvingButton(object sender, RoutedEventArgs e)
         {
+            // TODO : filter out invalid inputs
             int numberOfSeams = int.Parse(CarveImageTextBox.Text);
 
             // for now hard wired to carve horizontally, automatically calls the horizontal carver
 
             //carves image and immediatelly displays the result
             Bitmap newImage = businessLogic.sH.RemoveNHorizontalSeams(numberOfSeams);
-            ImageControl.Source = Tools.BitmapToImageSource(newImage);
 
-            // TODO : check wherter this line makes any sense
-            imageToDisplay = newImage;
-            updateSizeDisplay();            
+            displayImage(newImage);
+
 
             // after every finished carving step we create a temporary save file
             temporarySave(temporarySaveFiles, newImage, customSavePath, System.IO.Path.GetFileNameWithoutExtension(onlyFileName), businessLogic.ImageOriginalSize, applicationName);        
@@ -289,8 +281,7 @@ namespace SeamCarving
                 throw new NotImplementedException("onClosed(): deleting custom temporary save directory not yet implemented");
             }
         }
-
-        // TODO include the original image in the list
+                
         private void savedImagesDG_selectionChanged(object sender, SelectionChangedEventArgs e)
         {
             DataGrid dataGrid = (DataGrid)sender;
