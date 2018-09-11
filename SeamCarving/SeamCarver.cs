@@ -18,6 +18,8 @@ namespace SeamCarving
         private List<List<int>> seamMap;
         private int height;
         private int width;
+
+        // TODO change Int16 to short
         private Int16[] sqrtLookup;
         private int[] sqr;
         public bool SeamMapSetUp { set; get; }
@@ -585,6 +587,7 @@ namespace SeamCarving
         //height-4 rows are removed
         public Bitmap RemoveNHorizontalSeams(int n)
         {
+            // TODO number of removed seams check needs to be done earlier 
             int rowsToRemove = Math.Min(n, height - 4);
             while (rowsToRemove > 0)
             {

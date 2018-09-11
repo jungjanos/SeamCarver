@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 using System.Drawing;
 using System.ComponentModel;
 using System.IO;
-
+using System.Data;
 
 namespace SeamCarving
 {
@@ -83,6 +83,7 @@ namespace SeamCarving
 
         }
 
+        // TODO refactor this part to be in line with displayImage
         private void updateSizeDisplay()
         {
             if (businessLogic.ImageWorkingSize.IsEmpty == false)
@@ -91,6 +92,20 @@ namespace SeamCarving
                 heightLabel.Content = "Height: " + businessLogic.ImageWorkingSize.Height + "pixels";
             }
         }
+
+        private void displayImage(Bitmap bitmap)
+        {
+            ImageControl.Source = Tools.BitmapToImageSource(bitmap);
+            widthLabel.Content = "Width: " + bitmap.Width + "pixels";
+            heightLabel.Content = "Height: " + bitmap.Height + "pixels";
+        }
+        private void displayImage(string path)
+        {
+            Bitmap bitmap = new Bitmap(path);
+            displayImage(bitmap);
+        }
+
+
 
         private void clickedFileOpen(object sender, RoutedEventArgs e)
         {
@@ -269,7 +284,15 @@ namespace SeamCarving
             }
         }
 
+        // TODO include the original image in the list
+        private void savedImagesDG_selectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DataGrid dataGrid = (DataGrid)sender;
+            SaveFileCatalogEntry selectedRow = (SaveFileCatalogEntry)dataGrid.SelectedItem;
+            displayImage(selectedRow.FilePath);
 
 
+
+        }
     }
 }
