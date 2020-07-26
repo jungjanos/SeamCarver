@@ -130,18 +130,35 @@ namespace ConsoleApp1
         /// <param name="energyMap"> [height,width] map of energy calculated for each pixel </param>        
         /// <param name="width">width of actual working area</param>
         /// <param name="height">height of actual working area</param>
-        static void ConvertEnergyMapToVerticalSeamMap(int[,] energyMap, int width, int height)
+        static unsafe void ConvertEnergyMapToVerticalSeamMap(int[,] energyMap, int width, int height)
         {
-            for (int row = 1; row < height; row++)
+            var imageWidth = energyMap.GetLength(1);
+
+            fixed (int* ePtr = &energyMap[0, 0])
             {
-                energyMap[row, 0] += min3(int.MaxValue, energyMap[row - 1, 0], energyMap[row - 1, 1]);
 
-                for (int col = 1; col < width - 1; col++)
-                    energyMap[row, col] += min3(energyMap[row - 1, col - 1], energyMap[row - 1, col], energyMap[row - 1, col + 1]);
+                for (int row = 1; row < height; row++)
+                {
+                    int* eP = ePtr + row * imageWidth;
+                    energyMap[row, 0] += min3(int.MaxValue, energyMap[row - 1, 0], energyMap[row - 1, 1]);
 
-                energyMap[row, width - 1] += min3(energyMap[row - 1, width - 2], energyMap[row - 1, width - 1], int.MaxValue);
+                    Debug.Assert(energyMap[row, 0] == *eP, "Wrong refactor");
+
+
+                    for (int col = 1; col < width - 1; col++)
+                    {
+                        eP++;
+                        energyMap[row, col] += min3(energyMap[row - 1, col - 1], energyMap[row - 1, col], energyMap[row - 1, col + 1]);
+                        Debug.Assert(energyMap[row, col] == *eP, "Wrong refactor");
+                    }
+
+                    energyMap[row, width - 1] += min3(energyMap[row - 1, width - 2], energyMap[row - 1, width - 1], int.MaxValue);
+                }
+                int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy implementation exists
+
             }
-            int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy implementation exists
+
+
         }
 
         /// <summary>
@@ -228,9 +245,9 @@ namespace ConsoleApp1
                         var dx2a = *(aP + 1) - *(aP - 1); dx2a *= dx2a;
 
                         var dy2r = *(rP + pictureWidth) - *(rP - pictureWidth); dy2r *= dy2r;
-                        var dy2g = *(gP + pictureWidth) - *(gP - pictureWidth); dy2g *= dy2g;                        
+                        var dy2g = *(gP + pictureWidth) - *(gP - pictureWidth); dy2g *= dy2g;
                         var dy2b = *(bP + pictureWidth) - *(bP - pictureWidth); dy2b *= dy2b;
-                        var dy2a = *(aP + pictureWidth) - *(aP - pictureWidth); dy2a *= dy2a;                       
+                        var dy2a = *(aP + pictureWidth) - *(aP - pictureWidth); dy2a *= dy2a;
 
                         *eP = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
 
