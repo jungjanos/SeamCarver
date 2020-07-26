@@ -139,23 +139,20 @@ namespace ConsoleApp1
 
                 for (int row = 1; row < height; row++)
                 {
-                    int* eP = ePtr + row * imageWidth;
-                    energyMap[row, 0] += min3(int.MaxValue, energyMap[row - 1, 0], energyMap[row - 1, 1]);
-
-                    Debug.Assert(energyMap[row, 0] == *eP, "Wrong refactor");
+                    int* eP = ePtr + row * imageWidth;                    
+                    *eP += min3(int.MaxValue, *(eP - imageWidth), *(eP - imageWidth + 1));                   
 
 
                     for (int col = 1; col < width - 1; col++)
                     {
                         eP++;
-                        energyMap[row, col] += min3(energyMap[row - 1, col - 1], energyMap[row - 1, col], energyMap[row - 1, col + 1]);
-                        Debug.Assert(energyMap[row, col] == *eP, "Wrong refactor");
+                        *eP += min3(*(eP - imageWidth - 1), *(eP - imageWidth), *(eP - imageWidth + 1));                        
                     }
-
-                    energyMap[row, width - 1] += min3(energyMap[row - 1, width - 2], energyMap[row - 1, width - 1], int.MaxValue);
+                    
+                    ++eP;
+                    *eP += min3(*(eP-imageWidth -1), *(eP - imageWidth), int.MaxValue);
                 }
                 int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy implementation exists
-
             }
 
 
