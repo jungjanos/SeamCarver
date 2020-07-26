@@ -212,27 +212,6 @@ namespace ConsoleApp1
                 byte* bP = bPtr;
                 byte* aP = aPtr;
 
-
-                //for (int row = 1; row < height - 1; row++)
-                //{
-                //    // accounting for row major layout
-                //    for (int col = 1; col < width - 1; col++)
-                //    {
-                //        var dx2r = (r[row, col + 1] - r[row, col - 1]); dx2r *= dx2r;
-                //        var dx2g = (g[row, col + 1] - g[row, col - 1]); dx2g *= dx2g;
-                //        var dx2b = (b[row, col + 1] - b[row, col - 1]); dx2b *= dx2b;
-                //        var dx2a = (a[row, col + 1] - a[row, col - 1]); dx2a *= dx2a;
-
-
-                //        var dy2r = (r[row + 1, col] - r[row - 1, col]); dy2r *= dy2r;
-                //        var dy2g = (g[row + 1, col] - g[row - 1, col]); dy2g *= dy2g;
-                //        var dy2b = (b[row + 1, col] - b[row - 1, col]); dy2b *= dy2b;
-                //        var dy2a = (a[row + 1, col] - a[row - 1, col]); dy2a *= dy2a;
-
-                //        energyMap[row, col] = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
-                //    }
-                //}
-
                 for (int row = 1; row < height - 1; row++)
                 {
                     eP = ePtr + row * pictureWidth;
@@ -243,43 +222,17 @@ namespace ConsoleApp1
 
                     for (int col = 1; col < width - 1; col++)
                     {
-                        //var dx2r = (r[row, col + 1] - r[row, col - 1]); dx2r *= dx2r;
                         var dx2r = *(rP + 1) - *(rP - 1); dx2r *= dx2r;
-                        Debug.Assert(r[row, col + 1] - r[row, col - 1] == *(rP + 1) - *(rP - 1));
-
-
-                        //var dx2g = (g[row, col + 1] - g[row, col - 1]); dx2g *= dx2g;
                         var dx2g = *(gP + 1) - *(gP - 1); dx2g *= dx2g;
-                        Debug.Assert(g[row, col + 1] - g[row, col - 1] == *(gP + 1) - *(gP - 1));
-
-                        //var dx2b = (b[row, col + 1] - b[row, col - 1]); dx2b *= dx2b;
                         var dx2b = *(bP + 1) - *(bP - 1); dx2b *= dx2b;
-                        Debug.Assert(b[row, col + 1] - b[row, col - 1] == *(bP + 1) - *(bP - 1));
-
-                        //var dx2a = (a[row, col + 1] - a[row, col - 1]); dx2a *= dx2a;
                         var dx2a = *(aP + 1) - *(aP - 1); dx2a *= dx2a;
-                        Debug.Assert(a[row, col + 1] - a[row, col - 1] == *(aP + 1) - *(aP - 1));
 
-                        //var dy2r = (r[row + 1, col] - r[row - 1, col]); dy2r *= dy2r;
                         var dy2r = *(rP + pictureWidth) - *(rP - pictureWidth); dy2r *= dy2r;
-                        Debug.Assert(r[row + 1, col] - r[row - 1, col] == *(rP + pictureWidth) - *(rP - pictureWidth));
-
-                        //var dy2g = (g[row + 1, col] - g[row - 1, col]); dy2g *= dy2g;
-                        var dy2g = *(gP + pictureWidth) - *(gP - pictureWidth); dy2g *= dy2g;
-                        Debug.Assert(g[row + 1, col] - g[row - 1, col] == *(gP + pictureWidth) - *(gP - pictureWidth));
-
-                        //var dy2b = (b[row + 1, col] - b[row - 1, col]); dy2b *= dy2b;
+                        var dy2g = *(gP + pictureWidth) - *(gP - pictureWidth); dy2g *= dy2g;                        
                         var dy2b = *(bP + pictureWidth) - *(bP - pictureWidth); dy2b *= dy2b;
-                        Debug.Assert(b[row + 1, col] - b[row - 1, col] == *(bP + pictureWidth) - *(bP - pictureWidth));
+                        var dy2a = *(aP + pictureWidth) - *(aP - pictureWidth); dy2a *= dy2a;                       
 
-                        //var dy2a = (a[row + 1, col] - a[row - 1, col]); dy2a *= dy2a;
-                        var dy2a = *(aP + pictureWidth) - *(aP - pictureWidth); dy2a *= dy2a;
-                        Debug.Assert(a[row + 1, col] - a[row - 1, col] == *(aP + pictureWidth) - *(aP - pictureWidth));
-
-
-                         *eP = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
-                        //energyMap[row, col]
-                        Debug.Assert(eP == ePtr+ row*pictureWidth+col/*-1*/);
+                        *eP = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
 
                         eP++; rP++; gP++; bP++; aP++;
                     }
