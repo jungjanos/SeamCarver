@@ -246,7 +246,8 @@ namespace ConsoleApp1
                         var dy2b = *(bP + pictureWidth) - *(bP - pictureWidth); dy2b *= dy2b;
                         var dy2a = *(aP + pictureWidth) - *(aP - pictureWidth); dy2a *= dy2a;
 
-                        *eP = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+                        //*eP = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+                        *eP = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
 
                         eP++; rP++; gP++; bP++; aP++;
                     }
@@ -268,7 +269,8 @@ namespace ConsoleApp1
                 var dy2b = (b[1, col] - b[height - 1, col]); dy2b *= dy2b;
                 var dy2a = (a[1, col] - a[height - 1, col]); dy2a *= dy2a;
 
-                energyMap[0, col] = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+                energyMap[0, col] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
+                    (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
 
 
                 dx2r = (r[height - 1, col + 1] - r[height - 1, col - 1]); dx2r *= dx2r;
@@ -281,7 +283,8 @@ namespace ConsoleApp1
                 dy2b = (b[0, col] - b[height - 2, col]); dy2b *= dy2b;
                 dy2a = (a[0, col] - a[height - 2, col]); dy2a *= dy2a;
 
-                energyMap[height - 1, col] = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+                energyMap[height - 1, col] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a*/
+                    (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
             }
         }
 
@@ -299,7 +302,8 @@ namespace ConsoleApp1
                 var dy2b = (b[row + 1, 0] - b[row - 1, 0]); dy2b *= dy2b;
                 var dy2a = (a[row + 1, 0] - a[row - 1, 0]); dy2a *= dy2a;
 
-                energyMap[row, 0] = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+                energyMap[row, 0] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
+                    (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
 
 
                 dx2r = (r[row, 0] - r[row, width - 2]); dx2r *= dx2r;
@@ -312,7 +316,8 @@ namespace ConsoleApp1
                 dy2b = (b[row + 1, width - 1] - b[row - 1, width - 1]); dy2b *= dy2b;
                 dy2a = (a[row + 1, width - 1] - a[row - 1, width - 1]); dy2a *= dy2a;
 
-                energyMap[row, width - 1] = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+                energyMap[row, width - 1] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
+                    (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
             }
         }
 
@@ -328,7 +333,8 @@ namespace ConsoleApp1
             var dy2b = (b[1, 0] - b[height - 1, 0]); dy2b *= dy2b;
             var dy2a = (a[1, 0] - a[height - 1, 0]); dy2a *= dy2a;
 
-            energyMap[0, 0] = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+            energyMap[0, 0] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
+                (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
         }
 
         private static void CalculateCornerEnergyTopRight(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
@@ -343,7 +349,8 @@ namespace ConsoleApp1
             var dy2b = (b[1, width - 1] - b[height - 1, width - 1]); dy2b *= dy2b;
             var dy2a = (a[1, width - 1] - a[height - 1, width - 1]); dy2a *= dy2a;
 
-            energyMap[0, width - 1] = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+            energyMap[0, width - 1] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
+                (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
         }
 
         private static void CalculateCornerEnergyBottomLeft(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
@@ -358,7 +365,8 @@ namespace ConsoleApp1
             var dy2b = (b[0, 0] - b[height - 2, 0]); dy2b *= dy2b;
             var dy2a = (a[0, 0] - a[height - 2, 0]); dy2a *= dy2a;
 
-            energyMap[height - 1, 0] = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+            energyMap[height - 1, 0] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
+                (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
         }
 
         private static void CalculateCornerEnergyBottomRight(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
@@ -373,7 +381,8 @@ namespace ConsoleApp1
             var dy2b = (b[0, width - 1] - b[height - 2, width - 1]); dy2b *= dy2b;
             var dy2a = (a[0, width - 1] - a[height - 2, width - 1]); dy2a *= dy2a;
 
-            energyMap[height - 1, width - 1] = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+            energyMap[height - 1, width - 1] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
+                (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
         }
 
         // TODO Refactor to use Span<int> instead of Image<T> (decouple algorithm from image API)
