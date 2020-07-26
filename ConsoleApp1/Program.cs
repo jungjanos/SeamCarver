@@ -1,8 +1,10 @@
 ﻿using SeamCarver;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.ColorSpaces;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Buffers;
+using System.Runtime.InteropServices;
 
 namespace ConsoleApp1
 {
@@ -10,10 +12,9 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            //var arr = new int[,] { { 1, 2, 3 }, { 5, 7, 0 } };
 
-
-            using (Image<Rgba32> image = (Image<Rgba32>)Image<Rgba32>.Load(@"Sample.jpg"))
+            using (Image<Rgba32> image = (Image<Rgba32>)Image<Rgba32>.Load(@"Test1Sm.bmp"))
+            //using (Image<Rgba32> image = (Image<Rgba32>)Image<Rgba32>.Load(@"Sample.jpg"))
             //using (Image<Rgba32> image2 = (Image<Rgba32>)Image<Rgba32>.Load(@"Sample.bmp"))
             //using (Image<Rgba32> image3 = (Image<Rgba32>)Image<Rgba32>.Load(@"Sample.png"))
             {
@@ -27,6 +28,44 @@ namespace ConsoleApp1
                 TransformToSoaRgba(image, width, height, verticalCarving: true, r, g, b, a);
 
                 CalculateEnergyMap(width, height, verticalCarving: true, r, g, b, a, energyMap);
+
+                ConvertEnergyMapToVerticalSeamMap(energyMap, width, height);
+
+                var minimalSeam = new int[height];
+                CalculateMinimalVerticalSeam(energyMap, width, height, minimalSeam);
+
+                RemoveVerticalSeamPixels(minimalSeam, width, height, r, g, b, a);
+            }
+        }
+
+        // TODO make this faster (use vectors or 64bit scalars to copy)
+        unsafe static void RemoveVerticalSeamPixels(int[] seam, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a)
+        {
+            fixed (byte* rPtr = &r[0, 0])
+            fixed (byte* gPtr = &g[0, 0])
+            fixed (byte* bPtr = &b[0, 0])
+            fixed (byte* aPtr = &a[0, 0])
+            {
+                for (int row = 0; row < height; row++)
+                {
+                    int posToRemove = seam[row];
+                    var offset = row * width + posToRemove;
+
+                    byte* rP = rPtr + offset;
+                    byte* gP = gPtr + offset;
+                    byte* bP = bPtr + offset;
+                    byte* aP = aPtr + offset;
+
+                    for (int j = posToRemove; j < width - 1; j++)
+                    {
+                        *rP = *(rP + 1); rP++;
+                        *gP = *(gP + 1); gP++;
+                        *bP = *(bP + 1); bP++;
+                        *aP = *(aP + 1); aP++;
+                    }
+
+                    *rP = *gP = *bP = *aP = 255;
+                }
             }
         }
 
@@ -48,18 +87,79 @@ namespace ConsoleApp1
             }
         }
 
-        static void CalculateMinimumVerticalSeamMap(int[,] energyMap, int[,] seamMap, int width, int height)
+
+        /// <summary>
+        /// </summary>
+        /// <param name="energyMap"> [height,width] map of energy calculated for each pixel </param>        
+        /// <param name="width">actual picture width</param>
+        /// <param name="height">actual picture height</param>
+        static void ConvertEnergyMapToVerticalSeamMap(int[,] energyMap, int width, int height)
         {
+            for (int row = 1; row < height; row++)
+            {
+                energyMap[row, 0] += min3(energyMap[row - 1, 0], energyMap[row - 1, 0], energyMap[row - 1, 1]);
+
+                for (int col = 1; col < width - 1; col++)
+                    energyMap[row, col] += min3(energyMap[row - 1, col - 1], energyMap[row - 1, col], energyMap[row - 1, col + 1]);
+
+                energyMap[row, width - 1] += min3(energyMap[row - 1, width - 2], energyMap[row - 1, width - 1], energyMap[row - 1, width - 1]);
+            }
+            int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy exists
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="seamMap"> [height,width] map of energy calculated for each pixel </param>        
+        /// <param name="width">actual picture width</param>
+        /// <param name="height">actual picture height</param>
+        static void CalculateMinimalVerticalSeam(int[,] seamMap, int width, int height, int[] seamHorizontalIndexes)
+        {
+            int lastIndex = seamHorizontalIndexes[height - 1] = GetHorizontalIndexOfMinimumSeam();
+
+            for (int row = height - 2; row >= 0; row--)
+            {
+                var copy = lastIndex;
+
+                if (copy == 0)
+                    lastIndex = seamHorizontalIndexes[row] = min3Index(seamMap[row, 0], 0, seamMap[row, 0], 0, seamMap[row, 1], 1);
+
+                else if (copy == width - 1)
+                    lastIndex = seamHorizontalIndexes[row] = min3Index(seamMap[row, width - 1], width - 1, seamMap[row, width - 1], width - 1, seamMap[row, width - 2], width - 1);
+
+                else
+                    lastIndex = seamHorizontalIndexes[row] = min3Index(seamMap[row, copy - 1], copy - 1, seamMap[row, copy], copy, seamMap[row, copy + 1], copy + 1);
+            }
 
 
-            //accumulatedColumnSeamEnergy[0] += min3(energyMap[0, currentColumnNr], energyMap[0, currentColumnNr], energyMap[1, currentColumnNr]);
+            // returns the index of the smallest of the three array elements, if two are equal and both minimum, 
+            // it returns the index of the later of the two        
+            int min3Index(int a, int indexOfA, int b, int indexOfB, int c, int indexOfC)
+            {
+                int helper;
+                int indexHelper;
 
-            //for (int row = 1; row < height - 1; row++)
-            //    accumulatedColumnSeamEnergy[row] += min3(energyMap[row - 1, currentColumnNr], energyMap[row, currentColumnNr], energyMap[row + 1, currentColumnNr]);
+                if (a < b) { helper = a; indexHelper = indexOfA; }
+                else { helper = b; indexHelper = indexOfB; }
+                if (helper < c) { return indexHelper; }
+                else { return indexOfC; }
+            }
 
-            //accumulatedColumnSeamEnergy[height-1] += min3(energyMap[height - 2, currentColumnNr], energyMap[height - 1, currentColumnNr], energyMap[height - 1, currentColumnNr]);
 
-            //int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c);
+            int GetHorizontalIndexOfMinimumSeam()
+            {
+                int idx = -1;
+                int min = int.MaxValue;
+                for (int col = 0; col < width; col++)
+                {
+                    if (seamMap[height - 1, col] < min)
+                    {
+                        idx = col;
+                        min = seamMap[height - 1, col];
+                    }
+                }
+                return idx;
+            }
         }
 
 
@@ -246,6 +346,37 @@ namespace ConsoleApp1
             }
         }
 
+        /// <summary>
+        /// Transform from SoA to AoS representation
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="verticalCarving"></param>        
+        static unsafe void TransformToAosRgba(Image<Rgba32> image, int width, int height, bool verticalCarving, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[] buff)
+        {
+            // TODO make fast, vectorize, make all array access ptr based
+            if (verticalCarving)
+            {
+                uint pix = 0;
+                byte* pPix = (byte*)&pix;
+
+                for (int row = 0; row < height; row++)
+                {
+                    var rgbaRow = MemoryMarshal.Cast<Rgba32, uint>(image.GetPixelRowSpan(row));                    
+
+                    for (int col = 0; col < width; col++)
+                    {
+                        *(pPix++) = r[row, col];
+                        *(pPix++) = g[row, col];
+                        *(pPix++) = b[row, col];
+                        *pPix = a[row, col];
+                        rgbaRow[col] = pix;
+                    }
+                }
+            }
+            else
+                throw new NotImplementedException();
+        }
+
         // Note: .Net uses row major order for multi dimensional arrays
 
         static void AllocatePixelBuffers(int width, int height, bool verticalCarving, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out uint[] seamVector)
@@ -269,6 +400,5 @@ namespace ConsoleApp1
                 seamVector = new uint[height];
             }
         }
-
     }
 }
