@@ -48,6 +48,7 @@ namespace SeamCarver
         int Height { get; }
         int Width { get; }
 
+        void CropRightColumns(int columnsToCrop);
         void Dispose();
         Span<uint> GetRow(int rowIndex);
     }
@@ -83,7 +84,6 @@ namespace SeamCarver
         }
 
         public void Dispose() => _image.Dispose();
-
         public int Width => _image.Width;
         public int Height => _image.Height;
 
@@ -96,6 +96,18 @@ namespace SeamCarver
                 default: throw new InvalidEnumArgumentException($"format not supported {typeof(ImageFormat)}: {format}");
             }            
         }
+
+        public void CropRightColumns(int columnsToCrop)
+        {
+            if (columnsToCrop < 1 || columnsToCrop > Width)
+                throw new ArgumentOutOfRangeException(nameof(columnsToCrop), $"Tried to crop {columnsToCrop} columns, allowed: {1} - {Width}");
+
+            int w = Width;
+            int h = Height;
+
+            _image.Mutate(c => { c.Crop(w - columnsToCrop, h); });
+        }
+
     }
 }
 

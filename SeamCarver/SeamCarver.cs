@@ -26,6 +26,9 @@ namespace SeamCarver
                 RemoveNVerticalSeams(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamVector, cancel);
 
                 TransformToAosRgba(image, imageWidth, imageHeight, true, r, g, b, a);
+                
+                if (crop)
+                    image.CropRightColumns(columnsToCarve);
 
                 image.Save(outFs, outputFormat); 
             }            
@@ -103,7 +106,6 @@ namespace SeamCarver
                 throw new NotImplementedException();
             }
         }
-
 
         /// <summary></summary>
         /// <param name="energyMap"> [height,width] map of energy calculated for each pixel </param>        
@@ -428,7 +430,6 @@ namespace SeamCarver
             else
                 throw new NotImplementedException();
         }
-
 
         /// <summary>
         /// Allocates pixel buffers in advance
