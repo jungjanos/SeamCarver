@@ -6,7 +6,7 @@ namespace SeamCarver
 {
     public static class SeamCarver
     {
-        public static void CarveVertically(string imagePath, int columnsToCarve, string savePath, ImageFormat outputFormat, bool crop, CancellationToken cancel)
+        public static void CarveVertically(string imagePath, int columnsToCarve, string savePath, ImageFormat outputFormat, CancellationToken cancel, bool crop = true)
         {
             cancel.ThrowIfCancellationRequested();
 
