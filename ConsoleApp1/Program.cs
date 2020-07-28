@@ -7,7 +7,7 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            SeamCarver.SeamCarver.CarveVertically(imagePath: "Sample.jpg", columnsToCarve: 300, savePath: "SampleM.jpeg", ImageFormat.jpeg, crop: true, CancellationToken.None);
+            SeamCarver.SeamCarver.CarveVertically(imagePath: "Sample.jpg", columnsToCarve: 300, savePath: "SampleM.jpeg", ImageFormat.bmp, CancellationToken.None, crop: false);
         }
     }
 }

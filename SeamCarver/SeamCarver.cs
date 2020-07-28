@@ -19,6 +19,12 @@ namespace SeamCarver
                 int imageWidth = image.Width;
                 int imageHeight = image.Height;
 
+                if (imageWidth < 4)
+                    throw new ArgumentOutOfRangeException("Image too small for carving, at least with of 4 is required");
+
+                if (columnsToCarve < 1 || columnsToCarve > imageWidth - 3)
+                    throw new ArgumentOutOfRangeException($"Number of columns to carve is out of range: 1 - {imageWidth - 3}");
+
                 AllocatePixelBuffersForVCarving(imageWidth, imageHeight, verticalCarving: true, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out int[] seamVector);
 
                 TransformToSoaRgba(image, imageWidth, imageHeight, verticalCarving: true, r, g, b, a);
