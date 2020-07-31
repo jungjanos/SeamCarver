@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WebUI.Service;
 
 namespace WebUI
 {
@@ -25,6 +26,14 @@ namespace WebUI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddSingleton(typeof(FileSystemHelper), sp =>
+            {
+                var webRoot = ((IWebHostEnvironment)sp.GetRequiredService<IWebHostEnvironment>()).WebRootPath;
+                var uploadBaseVirtual = "Uploads";
+                var uploadBasePhysical = Path.Combine(webRoot, uploadBaseVirtual);
+                return new FileSystemHelper(uploadBasePhysical, uploadBaseVirtual);
+            });
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,17 +51,8 @@ namespace WebUI
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            //app.UseStaticFiles(
-            //    new StaticFileOptions
-            //    {
-            //        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(Path.Combine(env.ContentRootPath, "Uploads")),
-            //        RequestPath = "/images"
-            //    }); 
-
             app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

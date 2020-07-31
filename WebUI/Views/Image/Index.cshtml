@@ -23,11 +23,11 @@
 }
 else
 {
-    <img src="~/Uploads/@Model.ContentPath" class="img-fluid" asp-append-version="true" />
+    <img src="~/Uploads/@Model.Filename" class="img-fluid" asp-append-version="true" />
 
     <form method="post" asp-controller="Image" enctype="multipart/form-data" asp-action="CarveImage">
         <div class="form-group">
-            <input type="hidden" name="contentpath" value="@Model.ContentPath">
+            <input type="hidden" name="filename" value="@Model.Filename">
         </div>
         <div class="form-group">
             <input type="hidden" name="origfilename" value="@Model.OrigFileName">

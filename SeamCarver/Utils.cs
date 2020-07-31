@@ -1,12 +1,12 @@
 ﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 using System.ComponentModel;
+using Common;
 
 namespace SeamCarver
 {
@@ -33,12 +33,6 @@ namespace SeamCarver
                 throw new NotSupportedException($"Image is too large {image.Width } x {image.Height } (WxH) currently max 5000x5000px is supported");
 
             return new ImageWrapper(image);
-        }
-
-        public static void GuardNotNull<T>(T obj, [CallerMemberName] string name = "unknown")
-        {
-            if (obj == null)
-                throw new ArgumentNullException($"Method {name} was passed a null value (parameter type {typeof(T)}) ");
         }
     }
 
@@ -67,7 +61,7 @@ namespace SeamCarver
     {
         internal ImageWrapper(Image<Rgba32> image)
         {
-            Utils.GuardNotNull(image);
+            Common.Utils.GuardNotNull(image);
             _image = image;
         }
         private Image<Rgba32> _image;

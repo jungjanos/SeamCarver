@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SeamCarver", "..\SeamCarver
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "..\ConsoleApp1\ConsoleApp1.csproj", "{6870958A-2354-426B-95C6-0A4602AD31D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebUI", "..\WebUI\WebUI.csproj", "{4BE23F69-B5DB-47DF-979A-CDEEF585E901}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebUI", "..\WebUI\WebUI.csproj", "{4BE23F69-B5DB-47DF-979A-CDEEF585E901}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\Common\Common.csproj", "{328BD4C3-892B-496F-8EF3-E90BBD54A26C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{4BE23F69-B5DB-47DF-979A-CDEEF585E901}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BE23F69-B5DB-47DF-979A-CDEEF585E901}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BE23F69-B5DB-47DF-979A-CDEEF585E901}.Release|Any CPU.Build.0 = Release|Any CPU
+		{328BD4C3-892B-496F-8EF3-E90BBD54A26C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{328BD4C3-892B-496F-8EF3-E90BBD54A26C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{328BD4C3-892B-496F-8EF3-E90BBD54A26C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{328BD4C3-892B-496F-8EF3-E90BBD54A26C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
