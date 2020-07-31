@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -41,6 +42,12 @@ namespace WebUI
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            //app.UseStaticFiles(
+            //    new StaticFileOptions
+            //    {
+            //        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(Path.Combine(env.ContentRootPath, "Uploads")),
+            //        RequestPath = "/images"
+            //    }); 
 
             app.UseRouting();
 
