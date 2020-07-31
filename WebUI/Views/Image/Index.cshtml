@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Image page";
+}
+
+@model ImageViewModel
+
+<div class="text-center">
+    <h1 class="display-4"></h1>
+</div>
+
+
+@if (Model.OrigFileName == null)
+{
+    <div>upload an image</div>
+
+    <form method="post" asp-controller="Image" enctype="multipart/form-data" asp-action="UploadImage">
+        <div class="form-group">
+            <input type="file" class="form-control-file" name="uploadimage">
+        </div>
+        <button type="submit" class="btn btn-primary">upload</button>
+    </form>
+
+}
+else
+{
+    <img src="~/Uploads/@Model.ContentPath" class="img-fluid" asp-append-version="true" />
+
+    <form method="post" asp-controller="Image" enctype="multipart/form-data" asp-action="CarveImage">
+        <div class="form-group">
+            <input type="hidden" name="contentpath" value="@Model.ContentPath">
+        </div>
+        <div class="form-group">
+            <input type="hidden" name="origfilename" value="@Model.OrigFileName">
+        </div>
+        <div class="form-group"> 
+            <label>Columns to carve</label>
+            <input type="number" placeholder=0 name="columnsToCarve">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Carve!</button>
+    </form>
+
+}
+
+
+
+
+
+
