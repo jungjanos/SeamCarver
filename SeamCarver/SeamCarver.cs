@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace SeamCarver
@@ -14,7 +15,7 @@ namespace SeamCarver
                 throw new IOException($"there is already a file under the path {savePath}");
 
             using (var image = Utils.LoadImageAsWrappedRgba(imagePath))
-            using(var outFs = File.OpenWrite(savePath))
+            using (var outFs = File.OpenWrite(savePath))
             {
                 int imageWidth = image.Width;
                 int imageHeight = image.Height;
@@ -25,22 +26,22 @@ namespace SeamCarver
                 if (columnsToCarve < 1 || columnsToCarve > imageWidth - 3)
                     throw new ArgumentOutOfRangeException($"Number of columns to carve is out of range: 1 - {imageWidth - 3}");
 
-                AllocatePixelBuffersForVCarving(imageWidth, imageHeight, verticalCarving: true, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out int[] seamVector);
+                AllocatePixelBuffersForVCarving(imageWidth, imageHeight, verticalCarving: true, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out int[,] seamMap, out int[] seamVector);
 
                 TransformToSoaRgba(image, imageWidth, imageHeight, verticalCarving: true, r, g, b, a);
 
-                RemoveNVerticalSeams(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamVector, cancel);
+                RemoveNVerticalSeams(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamMap, seamVector, cancel);
 
                 TransformToAosRgba(image, imageWidth, imageHeight, true, r, g, b, a);
-                
+
                 if (crop)
                     image.CropRightColumns(columnsToCarve);
 
-                image.Save(outFs, outputFormat); 
-            }            
+                image.Save(outFs, outputFormat);
+            }
         }
 
-        static void RemoveNVerticalSeams(int n, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap, int[] seamVector, CancellationToken cancel)
+        static void RemoveNVerticalSeams(int n, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap, int[,] seamMap, int[] seamVector, CancellationToken cancel)
         {
             int w = width;
 
@@ -48,8 +49,8 @@ namespace SeamCarver
             {
                 cancel.ThrowIfCancellationRequested();
                 CalculateEnergyMap(w, height, verticalCarving: true, r, g, b, a, energyMap);
-                ConvertEnergyMapToVerticalSeamMap(energyMap, w, height);
-                CalculateMinimalVerticalSeam(energyMap, w, height, seamVector);
+                ConvertEnergyMapToVerticalSeamMap(energyMap, w, height, seamMap);
+                CalculateMinimalVerticalSeam(seamMap, w, height, seamVector);
                 RemoveVerticalSeamPixels(seamVector, w, height, r, g, b, a);
 
                 w--;
@@ -117,38 +118,64 @@ namespace SeamCarver
         /// <param name="energyMap"> [height,width] map of energy calculated for each pixel </param>        
         /// <param name="width">width of actual working area</param>
         /// <param name="height">height of actual working area</param>
-        static unsafe void ConvertEnergyMapToVerticalSeamMap(int[,] energyMap, int width, int height)
+        static unsafe void ConvertEnergyMapToVerticalSeamMap(int[,] energyMap, int width, int height, int[,] seamMap)
         {
             var imageWidth = energyMap.GetLength(1);
 
+            //fixed (int* ePtr = &energyMap[0, 0])
+            //{
+
+            //    for (int row = 1; row < height; row++)
+            //    {
+            //        int* eP = ePtr + row * imageWidth;
+            //        *eP += min3(int.MaxValue, *(eP - imageWidth), *(eP - imageWidth + 1));
+
+
+            //        for (int col = 1; col < width - 1; col++)
+            //        {
+            //            eP++;
+            //            *eP += min3(*(eP - imageWidth - 1), *(eP - imageWidth), *(eP - imageWidth + 1));
+            //        }
+
+            //        ++eP;
+            //        *eP += min3(*(eP - imageWidth - 1), *(eP - imageWidth), int.MaxValue);
+            //    }
+            //    int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy implementation exists
+            //}
+
             fixed (int* ePtr = &energyMap[0, 0])
+            fixed (int* sPtr = &seamMap[0, 0])
             {
+                for (int i = 0; i < width; i++)
+                    *(sPtr + i) = *(ePtr + i);
 
                 for (int row = 1; row < height; row++)
                 {
-                    int* eP = ePtr + row * imageWidth;
-                    *eP += min3(int.MaxValue, *(eP - imageWidth), *(eP - imageWidth + 1));
+                    int offset = row * imageWidth;
+                    int* eP = ePtr + offset;
+                    int* sP = sPtr + offset;
 
+                    *sP = *eP + min3(int.MaxValue, *(eP - imageWidth), *(eP - imageWidth + 1));
 
                     for (int col = 1; col < width - 1; col++)
                     {
-                        eP++;
-                        *eP += min3(*(eP - imageWidth - 1), *(eP - imageWidth), *(eP - imageWidth + 1));
+                        eP++; sP++;
+                        *sP = *eP + min3(*(eP - imageWidth - 1), *(eP - imageWidth), *(eP - imageWidth + 1));
                     }
 
-                    ++eP;
-                    *eP += min3(*(eP - imageWidth - 1), *(eP - imageWidth), int.MaxValue);
+                    ++eP; ++sP;
+
+                    *sP = *eP + min3(*(eP - imageWidth - 1), *(eP - imageWidth), int.MaxValue);
                 }
                 int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy implementation exists
             }
-
 
         }
 
         /// <summary>
         /// Calculates the horizontal indexes of a vertical seam
         /// </summary>
-        /// <param name="seamMap"> [height,width] map of energy calculated for each pixel </param>        
+        /// <param name="seamMap"> [height,width] map of minimum seam energy calculated for each pixel </param>        
         /// <param name="width">width of actual working area</param>
         /// <param name="height">height of actual working area</param>
         static void CalculateMinimalVerticalSeam(int[,] seamMap, int width, int height, int[] seamHorizontalIndexes)
@@ -446,7 +473,7 @@ namespace SeamCarver
         /// <param name="verticalCarving"></param>
         /// <param name="energyMap"></param>
         /// <param name="seamPath">Array to hold the minimum energy path</param>
-        static void AllocatePixelBuffersForVCarving(int width, int height, bool verticalCarving, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out int[] seamPath)
+        static void AllocatePixelBuffersForVCarving(int width, int height, bool verticalCarving, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out int[,] seamMap, out int[] seamPath)
         {
             if (verticalCarving) // y before x
             {
@@ -455,17 +482,12 @@ namespace SeamCarver
                 b = new byte[height, width];
                 a = new byte[height, width];
                 energyMap = new int[height, width];
+                seamMap = new int[height, width];
                 seamPath = new int[height];
             }
             else // x before y
             {
                 throw new NotImplementedException("");
-                //r = new byte[width, height];
-                //g = new byte[width, height];
-                //b = new byte[width, height];
-                //a = new byte[width, height];
-                //energyMap = new int[width, height];
-                //seamVector = new int[height];
             }
         }
 

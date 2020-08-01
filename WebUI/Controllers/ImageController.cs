@@ -15,9 +15,9 @@ namespace WebUI.Controllers
     {
         private readonly IWebHostEnvironment _env;
         private readonly FileSystemHelper _fsHelper;
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<ImageController> _logger;
 
-        public ImageController(IWebHostEnvironment env, FileSystemHelper fsHelper, ILogger<HomeController> logger)
+        public ImageController(IWebHostEnvironment env, FileSystemHelper fsHelper, ILogger<ImageController> logger)
         {
             _env = env;
             _fsHelper = fsHelper;
