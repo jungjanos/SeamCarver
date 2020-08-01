@@ -155,17 +155,17 @@ namespace SeamCarver
                     int* eP = ePtr + offset;
                     int* sP = sPtr + offset;
 
-                    *sP = *eP + min3(int.MaxValue, *(eP - imageWidth), *(eP - imageWidth + 1));
+                    *sP = *eP + min3(int.MaxValue, *(sP - imageWidth), *(sP - imageWidth + 1));
 
                     for (int col = 1; col < width - 1; col++)
                     {
                         eP++; sP++;
-                        *sP = *eP + min3(*(eP - imageWidth - 1), *(eP - imageWidth), *(eP - imageWidth + 1));
+                        *sP = *eP + min3(*(sP - imageWidth - 1), *(sP - imageWidth), *(sP - imageWidth + 1));
                     }
 
                     ++eP; ++sP;
 
-                    *sP = *eP + min3(*(eP - imageWidth - 1), *(eP - imageWidth), int.MaxValue);
+                    *sP = *eP + min3(*(sP - imageWidth - 1), *(sP - imageWidth), int.MaxValue);
                 }
                 int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy implementation exists
             }
