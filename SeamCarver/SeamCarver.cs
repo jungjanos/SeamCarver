@@ -122,27 +122,6 @@ namespace SeamCarver
         {
             var imageWidth = energyMap.GetLength(1);
 
-            //fixed (int* ePtr = &energyMap[0, 0])
-            //{
-
-            //    for (int row = 1; row < height; row++)
-            //    {
-            //        int* eP = ePtr + row * imageWidth;
-            //        *eP += min3(int.MaxValue, *(eP - imageWidth), *(eP - imageWidth + 1));
-
-
-            //        for (int col = 1; col < width - 1; col++)
-            //        {
-            //            eP++;
-            //            *eP += min3(*(eP - imageWidth - 1), *(eP - imageWidth), *(eP - imageWidth + 1));
-            //        }
-
-            //        ++eP;
-            //        *eP += min3(*(eP - imageWidth - 1), *(eP - imageWidth), int.MaxValue);
-            //    }
-            //    int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy implementation exists
-            //}
-
             fixed (int* ePtr = &energyMap[0, 0])
             fixed (int* sPtr = &seamMap[0, 0])
             {
@@ -169,7 +148,6 @@ namespace SeamCarver
                 }
                 int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy implementation exists
             }
-
         }
 
         /// <summary>
