@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace SeamCarver
@@ -247,9 +247,10 @@ namespace SeamCarver
 
                     *sP = *eP + min3(*(sP - imageWidth - 1), *(sP - imageWidth), int.MaxValue);
                 }
-                int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy implementation exists
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int min3(int a, int b, int c) => a < b ? (a < c ? a : c) : (b < c ? b : c); // TODO => check if less branchy implementation exists
 
         /// <summary>
         /// Calculates the horizontal indexes of a vertical seam
