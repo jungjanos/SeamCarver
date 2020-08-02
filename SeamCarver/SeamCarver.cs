@@ -28,11 +28,9 @@ namespace SeamCarver
 
                 AllocatePixelBuffersForVCarving(imageWidth, imageHeight, verticalCarving: true, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out int[,] seamMap, out int[] seamVector);
 
-                TransformToSoaRgba(image, imageWidth, imageHeight, verticalCarving: true, r, g, b, a);
+                TransformToSoaRgba(image, imageWidth, imageHeight, verticalCarving: true, r, g, b, a);                
 
-                //RemoveNVerticalSeams(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamMap, seamVector, cancel);
-
-                RemoveNVerticalSeams_2(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamMap, seamVector, cancel);
+                RemoveNVerticalSeams(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamMap, seamVector, cancel);
 
                 TransformToAosRgba(image, imageWidth, imageHeight, true, r, g, b, a);
 
@@ -43,23 +41,18 @@ namespace SeamCarver
             }
         }
 
+        /// <summary>
+        /// The main entry point for the seamcarver algorithm. Receives R,G,B,A arrays, working buffers and gives back the adjusted image in place
+        /// </summary>
+        /// <param name="n">number of vertical seams to carve</param>
+        /// <param name="width">image width</param>
+        /// <param name="height">image height</param>
+        /// <param name="r">r, g, b, a are SoA representation of pixels, in row major format</param>
+        /// <param name="energyMap">working buffer for pixel energy</param>
+        /// <param name="seamMap">working buffer for seam map</param>
+        /// <param name="seamVector"></param>
+        /// <param name="cancel"></param>
         static void RemoveNVerticalSeams(int n, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap, int[,] seamMap, int[] seamVector, CancellationToken cancel)
-        {
-            int w = width;
-
-            for (int i = 0; i < n; i++)
-            {
-                cancel.ThrowIfCancellationRequested();
-                CalculateEnergyMap(w, height, verticalCarving: true, r, g, b, a, energyMap);
-                ConvertEnergyMapToVerticalSeamMap(energyMap, w, height, seamMap);
-                CalculateMinimalVerticalSeam(seamMap, w, height, seamVector);
-                RemoveVerticalSeamPixels(seamVector, w, height, r, g, b, a);
-
-                w--;
-            }
-        }
-
-        static void RemoveNVerticalSeams_2(int n, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap, int[,] seamMap, int[] seamVector, CancellationToken cancel)
         {
             if (n == 0)
                 return;
@@ -81,8 +74,6 @@ namespace SeamCarver
                 w--;
             }
         }
-
-
 
         // TODO make this faster (use vectors or 64bit scalars to copy)
         /// <summary> Removes the specified vertical seam, fills last column with 0xFFFFFFFF</summary>
@@ -121,6 +112,15 @@ namespace SeamCarver
             }
         }
 
+        /// <summary>
+        /// Method removes the pixels of the given seam from the energyMap, this is done by left shifting row suffixes by 1 position to eliminiate the to be deleted pixel.
+        /// After this the energy of all pixels who have a new neighbour is recalculated
+        /// </summary>
+        /// <param name="seam">seam to be removed</param>
+        /// <param name="width">starting working width of the energy map, after the left shift this is reduced by one, caller must keep track</param>
+        /// <param name="height">height of image</param>
+        /// <param name="a">a, r, g, b is the representation of the current (already adjusted) image</param>
+        /// <param name="energyMap">energy map to be adjusted</param>
         unsafe static void AdjustEnergyMap(int[] seam, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
         {
             var imageWidth = energyMap.GetLength(1);
@@ -148,7 +148,6 @@ namespace SeamCarver
                 // TODO : test also with agressive inlining
                 RecalculateEnergyForSeamPixelNeighbours(row, seam[row]);
             }
-
 
             var top = seam[0];
             var bottom = seam[height - 1];
@@ -305,7 +304,10 @@ namespace SeamCarver
             }
         }
 
-        // TODO Sqrt must be vectorized (causes huge slowdown, float sqrt wouldnt loose precision)
+        // TODO 
+        // evaluate the possibility for using floats for energy/seam map
+        // evaluate possibility for using single precision sqrt with les int-> floating point->int conversion
+        // 32bit int=> 64bit double seems very unnecessary here, floats are ok up to +-16M for storing int
         private unsafe static void CalculateNonBorderEnergy(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
         {
             fixed (int* ePtr = &energyMap[0, 1])
@@ -340,8 +342,7 @@ namespace SeamCarver
                         var dy2g = *(gP + pictureWidth) - *(gP - pictureWidth); dy2g *= dy2g;
                         var dy2b = *(bP + pictureWidth) - *(bP - pictureWidth); dy2b *= dy2b;
                         var dy2a = *(aP + pictureWidth) - *(aP - pictureWidth); dy2a *= dy2a;
-
-                        //*eP = dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;
+                        
                         *eP = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
 
                         eP++; rP++; gP++; bP++; aP++;
@@ -364,8 +365,7 @@ namespace SeamCarver
                 var dy2b = (b[1, col] - b[height - 1, col]); dy2b *= dy2b;
                 var dy2a = (a[1, col] - a[height - 1, col]); dy2a *= dy2a;
 
-                energyMap[0, col] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
-                    (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+                energyMap[0, col] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
 
                 dx2r = (r[height - 1, col + 1] - r[height - 1, col - 1]); dx2r *= dx2r;
                 dx2g = (g[height - 1, col + 1] - g[height - 1, col - 1]); dx2g *= dx2g;
@@ -377,8 +377,7 @@ namespace SeamCarver
                 dy2b = (b[0, col] - b[height - 2, col]); dy2b *= dy2b;
                 dy2a = (a[0, col] - a[height - 2, col]); dy2a *= dy2a;
 
-                energyMap[height - 1, col] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a*/
-                    (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+                energyMap[height - 1, col] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
             }
         }
 
@@ -396,8 +395,7 @@ namespace SeamCarver
                 var dy2b = (b[row + 1, 0] - b[row - 1, 0]); dy2b *= dy2b;
                 var dy2a = (a[row + 1, 0] - a[row - 1, 0]); dy2a *= dy2a;
 
-                energyMap[row, 0] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
-                    (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+                energyMap[row, 0] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
 
 
                 dx2r = (r[row, 0] - r[row, width - 2]); dx2r *= dx2r;
@@ -410,8 +408,7 @@ namespace SeamCarver
                 dy2b = (b[row + 1, width - 1] - b[row - 1, width - 1]); dy2b *= dy2b;
                 dy2a = (a[row + 1, width - 1] - a[row - 1, width - 1]); dy2a *= dy2a;
 
-                energyMap[row, width - 1] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
-                    (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+                energyMap[row, width - 1] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
             }
         }
 
@@ -427,8 +424,7 @@ namespace SeamCarver
             var dy2b = (b[1, 0] - b[height - 1, 0]); dy2b *= dy2b;
             var dy2a = (a[1, 0] - a[height - 1, 0]); dy2a *= dy2a;
 
-            energyMap[0, 0] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
-                (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+            energyMap[0, 0] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
         }
 
         private static void CalculateCornerEnergyTopRight(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
@@ -443,8 +439,7 @@ namespace SeamCarver
             var dy2b = (b[1, width - 1] - b[height - 1, width - 1]); dy2b *= dy2b;
             var dy2a = (a[1, width - 1] - a[height - 1, width - 1]); dy2a *= dy2a;
 
-            energyMap[0, width - 1] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
-                (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+            energyMap[0, width - 1] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
         }
 
         private static void CalculateCornerEnergyBottomLeft(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
@@ -459,8 +454,7 @@ namespace SeamCarver
             var dy2b = (b[0, 0] - b[height - 2, 0]); dy2b *= dy2b;
             var dy2a = (a[0, 0] - a[height - 2, 0]); dy2a *= dy2a;
 
-            energyMap[height - 1, 0] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
-                (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+            energyMap[height - 1, 0] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
         }
 
         private static void CalculateCornerEnergyBottomRight(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
@@ -475,8 +469,7 @@ namespace SeamCarver
             var dy2b = (b[0, width - 1] - b[height - 2, width - 1]); dy2b *= dy2b;
             var dy2a = (a[0, width - 1] - a[height - 2, width - 1]); dy2a *= dy2a;
 
-            energyMap[height - 1, width - 1] = /*dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a;*/
-                (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+            energyMap[height - 1, width - 1] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
         }
 
         // TODO Refactor to use Span<int> instead of Image<T> (decouple algorithm from image API)
@@ -509,8 +502,7 @@ namespace SeamCarver
             else
                 throw new NotImplementedException();
         }
-
-        // TODO Refactor to use Span<int> instead of Image<T> (decouple algorithm from image API)
+        
         /// <summary>
         /// Transform from SoA to AoS representation
         /// </summary>
@@ -570,7 +562,5 @@ namespace SeamCarver
                 throw new NotImplementedException("");
             }
         }
-
-
     }
 }
