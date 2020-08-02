@@ -30,7 +30,9 @@ namespace SeamCarver
 
                 TransformToSoaRgba(image, imageWidth, imageHeight, verticalCarving: true, r, g, b, a);
 
-                RemoveNVerticalSeams(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamMap, seamVector, cancel);
+                //RemoveNVerticalSeams(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamMap, seamVector, cancel);
+
+                RemoveNVerticalSeams_2(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamMap, seamVector, cancel);
 
                 TransformToAosRgba(image, imageWidth, imageHeight, true, r, g, b, a);
 
@@ -56,6 +58,31 @@ namespace SeamCarver
                 w--;
             }
         }
+
+        static void RemoveNVerticalSeams_2(int n, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap, int[,] seamMap, int[] seamVector, CancellationToken cancel)
+        {
+            if (n == 0)
+                return;
+
+            cancel.ThrowIfCancellationRequested();
+
+            int w = width;
+            CalculateEnergyMap(w, height, verticalCarving: true, r, g, b, a, energyMap);
+
+            for (int i = 0; i < n; i++)
+            {
+                cancel.ThrowIfCancellationRequested();
+
+                ConvertEnergyMapToVerticalSeamMap(energyMap, w, height, seamMap);
+                CalculateMinimalVerticalSeam(seamMap, w, height, seamVector);
+                RemoveVerticalSeamPixels(seamVector, w, height, r, g, b, a);
+                AdjustEnergyMap(seamVector, w, height, r, g, b, a, energyMap);
+
+                w--;
+            }
+        }
+
+
 
         // TODO make this faster (use vectors or 64bit scalars to copy)
         /// <summary> Removes the specified vertical seam, fills last column with 0xFFFFFFFF</summary>
@@ -93,6 +120,81 @@ namespace SeamCarver
                 }
             }
         }
+
+        unsafe static void AdjustEnergyMap(int[] seam, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
+        {
+            var imageWidth = energyMap.GetLength(1);
+
+            // left shifting the energy map row-suffixes in place of the to be removed position
+            fixed (int* ePtr = &energyMap[0, 0])
+            {
+                for (int row = 0; row < height; row++)
+                {
+                    int posToRemove = seam[row];
+                    var offset = row * imageWidth + posToRemove;
+                    int* eP = ePtr + offset;
+
+                    for (int j = posToRemove; j < width - 1; j++)
+                    {
+                        *eP = *(eP + 1);
+                        eP++;
+                    }
+                    *eP = int.MinValue;
+                }
+            }
+
+            for (int row = 0; row < height; row++)
+            {
+                // TODO : test also with agressive inlining
+                RecalculateEnergyForSeamPixelNeighbours(row, seam[row]);
+            }
+
+
+            var top = seam[0];
+            var bottom = seam[height - 1];
+
+            for (int row = Math.Min(top, bottom); row < Math.Max(top, bottom); row++)
+            {
+                RecalculateEnergyForSeamPixelNeighbours(0, row);
+                RecalculateEnergyForSeamPixelNeighbours(height - 1, row);
+            }
+
+            void RecalculateEnergyForSeamPixelNeighbours(int row, int col)
+            {
+                int newWidth = width - 1;
+
+                // recalculate the energy of the pixel neighbouring the seam pixel from left
+                var left = (col - 1 + newWidth) % newWidth;
+
+                var dx2r = r[row, (left + 1) % newWidth] - r[row, (left - 1 + newWidth) % newWidth]; dx2r *= dx2r;
+                var dx2g = g[row, (left + 1) % newWidth] - g[row, (left - 1 + newWidth) % newWidth]; dx2g *= dx2g;
+                var dx2b = b[row, (left + 1) % newWidth] - b[row, (left - 1 + newWidth) % newWidth]; dx2b *= dx2b;
+                var dx2a = a[row, (left + 1) % newWidth] - a[row, (left - 1 + newWidth) % newWidth]; dx2a *= dx2a;
+
+                var dy2r = r[(row + 1) % height, left] - r[(row - 1 + height) % height, left]; dy2r *= dy2r;
+                var dy2g = g[(row + 1) % height, left] - g[(row - 1 + height) % height, left]; dy2g *= dy2g;
+                var dy2b = b[(row + 1) % height, left] - b[(row - 1 + height) % height, left]; dy2b *= dy2b;
+                var dy2a = a[(row + 1) % height, left] - a[(row - 1 + height) % height, left]; dy2a *= dy2a;
+
+                energyMap[row, left] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));                
+
+                // recalculate the energy of the pixel neighbouring the seam pixel from right
+                var right = col % newWidth;
+
+                dx2r = r[row, (right + 1) % newWidth] - r[row, (right - 1 + newWidth) % newWidth]; dx2r *= dx2r;
+                dx2g = g[row, (right + 1) % newWidth] - g[row, (right - 1 + newWidth) % newWidth]; dx2g *= dx2g;
+                dx2b = b[row, (right + 1) % newWidth] - b[row, (right - 1 + newWidth) % newWidth]; dx2b *= dx2b;
+                dx2a = a[row, (right + 1) % newWidth] - a[row, (right - 1 + newWidth) % newWidth]; dx2a *= dx2a;
+
+                dy2r = r[(row + 1) % height, right] - r[(row - 1 + height) % height, right]; dy2r *= dy2r;
+                dy2g = g[(row + 1) % height, right] - g[(row - 1 + height) % height, right]; dy2g *= dy2g;
+                dy2b = b[(row + 1) % height, right] - b[(row - 1 + height) % height, right]; dy2b *= dy2b;
+                dy2a = a[(row + 1) % height, right] - a[(row - 1 + height) % height, right]; dy2a *= dy2a;
+
+                energyMap[row, right] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+            }
+        }
+
         /// <summary></summary>
         /// <param name="width">width of actual working area</param>
         /// <param name="height">height of actual working area</param>                
