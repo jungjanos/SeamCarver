@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SeamCarver", "SeamCarver\SeamCarver.csproj", "{88460D20-73A3-462B-ACD3-A61016C8D9DF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{F7E31E14-C1B1-43E8-ABE3-CAB51EFCB24D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebUI", "WebUI\WebUI.csproj", "{656F507A-7D33-4F24-A991-5BCEE4630BF2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{CAB1D759-9414-4E18-BEDC-A041490D8C08}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PerformanceRuns", "PerformanceRuns", "{4C0D6550-C1D4-4ACF-BB52-7568D7E4D704}"
+	ProjectSection(SolutionItems) = preProject
+		PerformanceRuns\Report20200726-1502.diagsession = PerformanceRuns\Report20200726-1502.diagsession
+		PerformanceRuns\Report20200726-1515.diagsession = PerformanceRuns\Report20200726-1515.diagsession
+		PerformanceRuns\Report20200726-1657.diagsession = PerformanceRuns\Report20200726-1657.diagsession
+		PerformanceRuns\Report20200726-1814.diagsession = PerformanceRuns\Report20200726-1814.diagsession
+		PerformanceRuns\Report20200802-1224.diagsession = PerformanceRuns\Report20200802-1224.diagsession
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{78F90F75-2662-44E3-8F34-BD6A57F5A69F}"
+	ProjectSection(SolutionItems) = preProject
+		images\LeetCode_SpanT.jpg = images\LeetCode_SpanT.jpg
+		images\LeetCode_SpanT_Transposed.jpg = images\LeetCode_SpanT_Transposed.jpg
+		images\Sample.bmp = images\Sample.bmp
+		images\Sample.jpg = images\Sample.jpg
+		images\Sample.png = images\Sample.png
+		images\Test1Sm.bmp = images\Test1Sm.bmp
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{88460D20-73A3-462B-ACD3-A61016C8D9DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88460D20-73A3-462B-ACD3-A61016C8D9DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88460D20-73A3-462B-ACD3-A61016C8D9DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88460D20-73A3-462B-ACD3-A61016C8D9DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7E31E14-C1B1-43E8-ABE3-CAB51EFCB24D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7E31E14-C1B1-43E8-ABE3-CAB51EFCB24D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7E31E14-C1B1-43E8-ABE3-CAB51EFCB24D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7E31E14-C1B1-43E8-ABE3-CAB51EFCB24D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{656F507A-7D33-4F24-A991-5BCEE4630BF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{656F507A-7D33-4F24-A991-5BCEE4630BF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{656F507A-7D33-4F24-A991-5BCEE4630BF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{656F507A-7D33-4F24-A991-5BCEE4630BF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAB1D759-9414-4E18-BEDC-A041490D8C08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAB1D759-9414-4E18-BEDC-A041490D8C08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAB1D759-9414-4E18-BEDC-A041490D8C08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAB1D759-9414-4E18-BEDC-A041490D8C08}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {67425F37-07D5-4A91-8665-564A8ACFB766}
+	EndGlobalSection
+EndGlobal
