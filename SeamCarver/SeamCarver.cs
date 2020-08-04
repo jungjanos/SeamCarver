@@ -28,7 +28,7 @@ namespace SeamCarver
 
                 AllocatePixelBuffersForVCarving(imageWidth, imageHeight, verticalCarving: true, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out int[,] seamMap, out int[] seamVector);
 
-                TransformToSoaRgba(image, imageWidth, imageHeight, verticalCarving: true, r, g, b, a);                
+                TransformToSoaRgba(image, imageWidth, imageHeight, verticalCarving: true, r, g, b, a);
 
                 RemoveNVerticalSeams(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamMap, seamVector, cancel);
 
@@ -145,8 +145,7 @@ namespace SeamCarver
 
             for (int row = 0; row < height; row++)
             {
-                // TODO : test also with agressive inlining
-                RecalculateEnergyForSeamPixelNeighbours(row, seam[row]);
+                RecalculateEnergyForPixelNeighbours(row, seam[row], width - 1, height, r, g, b, a, energyMap);
             }
 
             var top = seam[0];
@@ -154,45 +153,60 @@ namespace SeamCarver
 
             for (int row = Math.Min(top, bottom); row < Math.Max(top, bottom); row++)
             {
-                RecalculateEnergyForSeamPixelNeighbours(0, row);
-                RecalculateEnergyForSeamPixelNeighbours(height - 1, row);
-            }
-
-            void RecalculateEnergyForSeamPixelNeighbours(int row, int col)
-            {
-                int newWidth = width - 1;
-
-                // recalculate the energy of the pixel neighbouring the seam pixel from left
-                var left = (col - 1 + newWidth) % newWidth;
-
-                var dx2r = r[row, (left + 1) % newWidth] - r[row, (left - 1 + newWidth) % newWidth]; dx2r *= dx2r;
-                var dx2g = g[row, (left + 1) % newWidth] - g[row, (left - 1 + newWidth) % newWidth]; dx2g *= dx2g;
-                var dx2b = b[row, (left + 1) % newWidth] - b[row, (left - 1 + newWidth) % newWidth]; dx2b *= dx2b;
-                var dx2a = a[row, (left + 1) % newWidth] - a[row, (left - 1 + newWidth) % newWidth]; dx2a *= dx2a;
-
-                var dy2r = r[(row + 1) % height, left] - r[(row - 1 + height) % height, left]; dy2r *= dy2r;
-                var dy2g = g[(row + 1) % height, left] - g[(row - 1 + height) % height, left]; dy2g *= dy2g;
-                var dy2b = b[(row + 1) % height, left] - b[(row - 1 + height) % height, left]; dy2b *= dy2b;
-                var dy2a = a[(row + 1) % height, left] - a[(row - 1 + height) % height, left]; dy2a *= dy2a;
-
-                energyMap[row, left] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));                
-
-                // recalculate the energy of the pixel neighbouring the seam pixel from right
-                var right = col % newWidth;
-
-                dx2r = r[row, (right + 1) % newWidth] - r[row, (right - 1 + newWidth) % newWidth]; dx2r *= dx2r;
-                dx2g = g[row, (right + 1) % newWidth] - g[row, (right - 1 + newWidth) % newWidth]; dx2g *= dx2g;
-                dx2b = b[row, (right + 1) % newWidth] - b[row, (right - 1 + newWidth) % newWidth]; dx2b *= dx2b;
-                dx2a = a[row, (right + 1) % newWidth] - a[row, (right - 1 + newWidth) % newWidth]; dx2a *= dx2a;
-
-                dy2r = r[(row + 1) % height, right] - r[(row - 1 + height) % height, right]; dy2r *= dy2r;
-                dy2g = g[(row + 1) % height, right] - g[(row - 1 + height) % height, right]; dy2g *= dy2g;
-                dy2b = b[(row + 1) % height, right] - b[(row - 1 + height) % height, right]; dy2b *= dy2b;
-                dy2a = a[(row + 1) % height, right] - a[(row - 1 + height) % height, right]; dy2a *= dy2a;
-
-                energyMap[row, right] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+                CalculateEnergyForPixel(0, row, width - 1, height, r, g, b, a, energyMap);
+                CalculateEnergyForPixel(height - 1, row, width - 1, height, r, g, b, a, energyMap);
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void RecalculateEnergyForPixelNeighbours(int row, int col, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
+        {
+            // recalculate the energy of the pixel neighbouring the seam pixel from left
+            var left = (col - 1 + width) % width;
+
+            var dx2r = r[row, (left + 1) % width] - r[row, (left - 1 + width) % width]; dx2r *= dx2r;
+            var dx2g = g[row, (left + 1) % width] - g[row, (left - 1 + width) % width]; dx2g *= dx2g;
+            var dx2b = b[row, (left + 1) % width] - b[row, (left - 1 + width) % width]; dx2b *= dx2b;
+            var dx2a = a[row, (left + 1) % width] - a[row, (left - 1 + width) % width]; dx2a *= dx2a;
+
+            var dy2r = r[(row + 1) % height, left] - r[(row - 1 + height) % height, left]; dy2r *= dy2r;
+            var dy2g = g[(row + 1) % height, left] - g[(row - 1 + height) % height, left]; dy2g *= dy2g;
+            var dy2b = b[(row + 1) % height, left] - b[(row - 1 + height) % height, left]; dy2b *= dy2b;
+            var dy2a = a[(row + 1) % height, left] - a[(row - 1 + height) % height, left]; dy2a *= dy2a;
+
+            energyMap[row, left] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+
+            // recalculate the energy of the pixel neighbouring the seam pixel from right
+            var right = col % width;
+
+            dx2r = r[row, (right + 1) % width] - r[row, (right - 1 + width) % width]; dx2r *= dx2r;
+            dx2g = g[row, (right + 1) % width] - g[row, (right - 1 + width) % width]; dx2g *= dx2g;
+            dx2b = b[row, (right + 1) % width] - b[row, (right - 1 + width) % width]; dx2b *= dx2b;
+            dx2a = a[row, (right + 1) % width] - a[row, (right - 1 + width) % width]; dx2a *= dx2a;
+
+            dy2r = r[(row + 1) % height, right] - r[(row - 1 + height) % height, right]; dy2r *= dy2r;
+            dy2g = g[(row + 1) % height, right] - g[(row - 1 + height) % height, right]; dy2g *= dy2g;
+            dy2b = b[(row + 1) % height, right] - b[(row - 1 + height) % height, right]; dy2b *= dy2b;
+            dy2a = a[(row + 1) % height, right] - a[(row - 1 + height) % height, right]; dy2a *= dy2a;
+
+            energyMap[row, right] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+        }
+
+        static void CalculateEnergyForPixel(int row, int col, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
+        {
+            var dx2r = r[row, (col + 1) % width] - r[row, (col - 1 + width) % width]; dx2r *= dx2r;
+            var dx2g = g[row, (col + 1) % width] - g[row, (col - 1 + width) % width]; dx2g *= dx2g;
+            var dx2b = b[row, (col + 1) % width] - b[row, (col - 1 + width) % width]; dx2b *= dx2b;
+            var dx2a = a[row, (col + 1) % width] - a[row, (col - 1 + width) % width]; dx2a *= dx2a;
+
+            var dy2r = r[(row + 1) % height, col] - r[(row - 1 + height) % height, col]; dy2r *= dy2r;
+            var dy2g = g[(row + 1) % height, col] - g[(row - 1 + height) % height, col]; dy2g *= dy2g;
+            var dy2b = b[(row + 1) % height, col] - b[(row - 1 + height) % height, col]; dy2b *= dy2b;
+            var dy2a = a[(row + 1) % height, col] - a[(row - 1 + height) % height, col]; dy2a *= dy2a;
+
+            energyMap[row, col] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
+        }
+
 
         /// <summary></summary>
         /// <param name="width">width of actual working area</param>
@@ -201,13 +215,20 @@ namespace SeamCarver
         {
             if (verticalCarving)
             {
+                for (int col = 0; col < width; col++)
+                {
+                    CalculateEnergyForPixel(row: 0, col, width, height, r, g, b, a, energyMap);
+                    CalculateEnergyForPixel(row: height - 1, col, width, height, r, g, b, a, energyMap);
+                }
+
+                for (int row = 1; row < height - 1; row++)
+                {
+                    CalculateEnergyForPixel(row, 0, width, height, r, g, b, a, energyMap);
+                    CalculateEnergyForPixel(row, width - 1, width, height, r, g, b, a, energyMap);
+                }
+
                 CalculateNonBorderEnergy(width, height, r, g, b, a, energyMap);
-                CalculateCornerEnergyTopLeft(width, height, r, g, b, a, energyMap);
-                CalculateCornerEnergyTopRight(width, height, r, g, b, a, energyMap);
-                CalculateCornerEnergyBottomLeft(width, height, r, g, b, a, energyMap);
-                CalculateCornerEnergyBottomRight(width, height, r, g, b, a, energyMap);
-                CalculateBorderEnergyVertical(width, height, r, g, b, a, energyMap);
-                CalculateBorderEnergyHorizontal(width, height, r, g, b, a, energyMap);
+
             }
             else
             {
@@ -343,134 +364,13 @@ namespace SeamCarver
                         var dy2g = *(gP + pictureWidth) - *(gP - pictureWidth); dy2g *= dy2g;
                         var dy2b = *(bP + pictureWidth) - *(bP - pictureWidth); dy2b *= dy2b;
                         var dy2a = *(aP + pictureWidth) - *(aP - pictureWidth); dy2a *= dy2a;
-                        
+
                         *eP = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
 
                         eP++; rP++; gP++; bP++; aP++;
                     }
                 }
             }
-        }
-
-        private static void CalculateBorderEnergyHorizontal(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
-        {
-            for (int col = 1; col < width - 1; col++)
-            {
-                var dx2r = (r[0, col + 1] - r[0, col - 1]); dx2r *= dx2r;
-                var dx2g = (g[0, col + 1] - g[0, col - 1]); dx2g *= dx2g;
-                var dx2b = (b[0, col + 1] - b[0, col - 1]); dx2b *= dx2b;
-                var dx2a = (a[0, col + 1] - a[0, col - 1]); dx2a *= dx2a;
-
-                var dy2r = (r[1, col] - r[height - 1, col]); dy2r *= dy2r;
-                var dy2g = (g[1, col] - g[height - 1, col]); dy2g *= dy2g;
-                var dy2b = (b[1, col] - b[height - 1, col]); dy2b *= dy2b;
-                var dy2a = (a[1, col] - a[height - 1, col]); dy2a *= dy2a;
-
-                energyMap[0, col] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
-
-                dx2r = (r[height - 1, col + 1] - r[height - 1, col - 1]); dx2r *= dx2r;
-                dx2g = (g[height - 1, col + 1] - g[height - 1, col - 1]); dx2g *= dx2g;
-                dx2b = (b[height - 1, col + 1] - b[height - 1, col - 1]); dx2b *= dx2b;
-                dx2a = (a[height - 1, col + 1] - a[height - 1, col - 1]); dx2a *= dx2a;
-
-                dy2r = (r[0, col] - r[height - 2, col]); dy2r *= dy2r;
-                dy2g = (g[0, col] - g[height - 2, col]); dy2g *= dy2g;
-                dy2b = (b[0, col] - b[height - 2, col]); dy2b *= dy2b;
-                dy2a = (a[0, col] - a[height - 2, col]); dy2a *= dy2a;
-
-                energyMap[height - 1, col] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
-            }
-        }
-
-        private static void CalculateBorderEnergyVertical(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
-        {
-            for (int row = 1; row < height - 1; row++)
-            {
-                var dx2r = (r[row, 1] - r[row, width - 1]); dx2r *= dx2r;
-                var dx2g = (g[row, 1] - g[row, width - 1]); dx2g *= dx2g;
-                var dx2b = (b[row, 1] - b[row, width - 1]); dx2b *= dx2b;
-                var dx2a = (a[row, 1] - a[row, width - 1]); dx2a *= dx2a;
-
-                var dy2r = (r[row + 1, 0] - r[row - 1, 0]); dy2r *= dy2r;
-                var dy2g = (g[row + 1, 0] - g[row - 1, 0]); dy2g *= dy2g;
-                var dy2b = (b[row + 1, 0] - b[row - 1, 0]); dy2b *= dy2b;
-                var dy2a = (a[row + 1, 0] - a[row - 1, 0]); dy2a *= dy2a;
-
-                energyMap[row, 0] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
-
-
-                dx2r = (r[row, 0] - r[row, width - 2]); dx2r *= dx2r;
-                dx2g = (g[row, 0] - g[row, width - 2]); dx2g *= dx2g;
-                dx2b = (b[row, 0] - b[row, width - 2]); dx2b *= dx2b;
-                dx2a = (a[row, 0] - a[row, width - 2]); dx2a *= dx2a;
-
-                dy2r = (r[row + 1, width - 1] - r[row - 1, width - 1]); dy2r *= dy2r;
-                dy2g = (g[row + 1, width - 1] - g[row - 1, width - 1]); dy2g *= dy2g;
-                dy2b = (b[row + 1, width - 1] - b[row - 1, width - 1]); dy2b *= dy2b;
-                dy2a = (a[row + 1, width - 1] - a[row - 1, width - 1]); dy2a *= dy2a;
-
-                energyMap[row, width - 1] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
-            }
-        }
-
-        private static void CalculateCornerEnergyTopLeft(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
-        {
-            var dx2r = r[0, 1] - r[0, width - 1]; dx2r *= dx2r;
-            var dx2g = g[0, 1] - g[0, width - 1]; dx2g *= dx2g;
-            var dx2b = b[0, 1] - b[0, width - 1]; dx2b *= dx2b;
-            var dx2a = a[0, 1] - a[0, width - 1]; dx2a *= dx2a;
-
-            var dy2r = (r[1, 0] - r[height - 1, 0]); dy2r *= dy2r;
-            var dy2g = (g[1, 0] - g[height - 1, 0]); dy2g *= dy2g;
-            var dy2b = (b[1, 0] - b[height - 1, 0]); dy2b *= dy2b;
-            var dy2a = (a[1, 0] - a[height - 1, 0]); dy2a *= dy2a;
-
-            energyMap[0, 0] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
-        }
-
-        private static void CalculateCornerEnergyTopRight(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
-        {
-            var dx2r = r[0, 0] - r[0, width - 2]; dx2r *= dx2r;
-            var dx2g = g[0, 0] - g[0, width - 2]; dx2g *= dx2g;
-            var dx2b = b[0, 0] - b[0, width - 2]; dx2b *= dx2b;
-            var dx2a = a[0, 0] - a[0, width - 2]; dx2a *= dx2a;
-
-            var dy2r = (r[1, width - 1] - r[height - 1, width - 1]); dy2r *= dy2r;
-            var dy2g = (g[1, width - 1] - g[height - 1, width - 1]); dy2g *= dy2g;
-            var dy2b = (b[1, width - 1] - b[height - 1, width - 1]); dy2b *= dy2b;
-            var dy2a = (a[1, width - 1] - a[height - 1, width - 1]); dy2a *= dy2a;
-
-            energyMap[0, width - 1] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
-        }
-
-        private static void CalculateCornerEnergyBottomLeft(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
-        {
-            var dx2r = r[height - 1, 1] - r[height - 1, width - 1]; dx2r *= dx2r;
-            var dx2g = g[height - 1, 1] - g[height - 1, width - 1]; dx2g *= dx2g;
-            var dx2b = b[height - 1, 1] - b[height - 1, width - 1]; dx2b *= dx2b;
-            var dx2a = a[height - 1, 1] - a[height - 1, width - 1]; dx2a *= dx2a;
-
-            var dy2r = (r[0, 0] - r[height - 2, 0]); dy2r *= dy2r;
-            var dy2g = (g[0, 0] - g[height - 2, 0]); dy2g *= dy2g;
-            var dy2b = (b[0, 0] - b[height - 2, 0]); dy2b *= dy2b;
-            var dy2a = (a[0, 0] - a[height - 2, 0]); dy2a *= dy2a;
-
-            energyMap[height - 1, 0] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
-        }
-
-        private static void CalculateCornerEnergyBottomRight(int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap)
-        {
-            var dx2r = r[height - 1, 0] - r[height - 1, width - 2]; dx2r *= dx2r;
-            var dx2g = g[height - 1, 0] - g[height - 1, width - 2]; dx2g *= dx2g;
-            var dx2b = b[height - 1, 0] - b[height - 1, width - 2]; dx2b *= dx2b;
-            var dx2a = a[height - 1, 0] - a[height - 1, width - 2]; dx2a *= dx2a;
-
-            var dy2r = (r[0, width - 1] - r[height - 2, width - 1]); dy2r *= dy2r;
-            var dy2g = (g[0, width - 1] - g[height - 2, width - 1]); dy2g *= dy2g;
-            var dy2b = (b[0, width - 1] - b[height - 2, width - 1]); dy2b *= dy2b;
-            var dy2a = (a[0, width - 1] - a[height - 2, width - 1]); dy2a *= dy2a;
-
-            energyMap[height - 1, width - 1] = (int)Math.Round(Math.Sqrt((double)dx2r + dx2g + dx2b + dx2a + dy2r + dy2g + dy2b + dy2a));
         }
 
         // TODO Refactor to use Span<int> instead of Image<T> (decouple algorithm from image API)
@@ -503,7 +403,7 @@ namespace SeamCarver
             else
                 throw new NotImplementedException();
         }
-        
+
         /// <summary>
         /// Transform from SoA to AoS representation
         /// </summary>
