@@ -46,7 +46,7 @@ namespace WebUI.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> CarveImage(string filename, string origfilename, int columnsToCarve)
+        public IActionResult CarveImage(string filename, string origfilename, int columnsToCarve)
         {
             var physicalPath = _fsHelper.PrependPhysicalFolderPath(filename);
             var targetFilename = _fsHelper.CreateRandomFilename(origfilename);            
