@@ -51,7 +51,7 @@ namespace WebUI.Controllers
             var physicalPath = _fsHelper.PrependPhysicalFolderPath(filename);
             var targetFilename = _fsHelper.CreateRandomFilename(origfilename);            
 
-            SeamCarver.SeamCarver.CarveVertically(physicalPath, columnsToCarve, _fsHelper.PrependPhysicalFolderPath(targetFilename), ImageFormat.jpeg, CancellationToken.None);
+            SeamCarver.SeamCarverWrapper.CarveVertically(physicalPath, columnsToCarve, _fsHelper.PrependPhysicalFolderPath(targetFilename), ImageFormat.jpeg, CancellationToken.None);
 
             return View("Index", new ImageViewModel(targetFilename, null, null, origfilename, null));
         }

@@ -7,42 +7,8 @@ using System.Threading;
 
 namespace SeamCarver
 {
-    public static class SeamCarver
+    public static class SeamCarverAlgorithm
     {
-        public static void CarveVertically(string imagePath, int columnsToCarve, string savePath, ImageFormat outputFormat, CancellationToken cancel, bool crop = true)
-        {
-            cancel.ThrowIfCancellationRequested();
-
-            if (File.Exists(savePath))
-                throw new IOException($"there is already a file under the path {savePath}");
-
-            using (var image = ImageWrapper.LoadImageAsWrappedRgba(imagePath))
-            using (var outFs = File.OpenWrite(savePath))
-            {
-                int imageWidth = image.Width;
-                int imageHeight = image.Height;
-
-                if (imageWidth < 4)
-                    throw new ArgumentOutOfRangeException("Image too small for carving, at least with of 4 is required");
-
-                if (columnsToCarve < 1 || columnsToCarve > imageWidth - 3)
-                    throw new ArgumentOutOfRangeException($"Number of columns to carve is out of range: 1 - {imageWidth - 3}");
-
-                AllocatePixelBuffersForVCarving(imageWidth, imageHeight, verticalCarving: true, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out int[,] seamMap, out int[] seamVector);
-
-                Utils.TransformToSoaRgba(image, imageWidth, imageHeight, verticalCarving: true, r, g, b, a);
-
-                RemoveNVerticalSeams(columnsToCarve, imageWidth, imageHeight, r, g, b, a, energyMap, seamMap, seamVector, cancel);
-
-                Utils.TransformToAosRgba(image, imageWidth, imageHeight, true, r, g, b, a);
-
-                if (crop)
-                    image.CropRightColumns(columnsToCarve);
-
-                image.Save(outFs, outputFormat);
-            }
-        }
-
         /// <summary>
         /// The main entry point for the seamcarver algorithm. Receives R,G,B,A arrays, working buffers and gives back the adjusted image in place
         /// </summary>
@@ -54,7 +20,7 @@ namespace SeamCarver
         /// <param name="seamMap">working buffer for seam map</param>
         /// <param name="seamVector"></param>
         /// <param name="cancel"></param>
-        static void RemoveNVerticalSeams(int n, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap, int[,] seamMap, int[] seamVector, CancellationToken cancel)
+        internal static void RemoveNVerticalSeams(int n, int width, int height, byte[,] r, byte[,] g, byte[,] b, byte[,] a, int[,] energyMap, int[,] seamMap, int[] seamVector, CancellationToken cancel)
         {
             if (n == 0)
                 return;
@@ -384,7 +350,7 @@ namespace SeamCarver
         /// <param name="verticalCarving"></param>
         /// <param name="energyMap"></param>
         /// <param name="seamPath">Array to hold the minimum energy path</param>
-        static void AllocatePixelBuffersForVCarving(int width, int height, bool verticalCarving, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out int[,] seamMap, out int[] seamPath)
+        internal static void AllocatePixelBuffersForVCarving(int width, int height, bool verticalCarving, out byte[,] r, out byte[,] g, out byte[,] b, out byte[,] a, out int[,] energyMap, out int[,] seamMap, out int[] seamPath)
         {
             if (verticalCarving) // y before x
             {
