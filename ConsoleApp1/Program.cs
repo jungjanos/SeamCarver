@@ -1,4 +1,4 @@
-﻿using SeamCarver;
+﻿using Common;
 using System.Threading;
 
 namespace ConsoleApp1

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Common;
+using Common.ImageSharp;
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -14,7 +16,7 @@ namespace SeamCarver
             if (File.Exists(savePath))
                 throw new IOException($"there is already a file under the path {savePath}");
 
-            using (var image = Utils.LoadImageAsWrappedRgba(imagePath))
+            using (var image = ImageWrapper.LoadImageAsWrappedRgba(imagePath))
             using (var outFs = File.OpenWrite(savePath))
             {
                 int imageWidth = image.Width;

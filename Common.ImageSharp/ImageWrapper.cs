@@ -1,16 +1,18 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.ComponentModel;
-using Common;
 
-namespace SeamCarver
+namespace Common.ImageSharp
 {
-    public static class Utils
+    /// <summary>
+    /// Thin wrapper around SixLabors.ImageSharp.Image<Rgba32>. 
+    /// Caller is responsible to not read Spans above image dimensions
+    /// </summary>
+    public struct ImageWrapper : IDisposable, IImageWrapper
     {
         public static ImageWrapper LoadImageAsWrappedRgba(string path)
         {
@@ -34,31 +36,7 @@ namespace SeamCarver
 
             return new ImageWrapper(image);
         }
-    }
 
-    public interface IImageWrapper
-    {
-        Span<uint> GetAllRaws { get; }
-        int Height { get; }
-        int Width { get; }
-
-        void CropRightColumns(int columnsToCrop);
-        void Dispose();
-        Span<uint> GetRow(int rowIndex);
-    }
-
-    public enum ImageFormat
-    {
-        bmp = 1,
-        jpeg = 2
-    }
-
-    /// <summary>
-    /// Thin wrapper around SixLabors.ImageSharp.Image<Rgba32>. 
-    /// Caller is responsible to not read Spans above image dimensions
-    /// </summary>
-    public struct ImageWrapper : IDisposable, IImageWrapper
-    {
         internal ImageWrapper(Image<Rgba32> image)
         {
             Common.Utils.GuardNotNull(image);
@@ -88,7 +66,7 @@ namespace SeamCarver
                 case ImageFormat.bmp: { _image.SaveAsBmp(fs); break; }
                 case ImageFormat.jpeg: { _image.SaveAsJpeg(fs); break; }
                 default: throw new InvalidEnumArgumentException($"format not supported {typeof(ImageFormat)}: {format}");
-            }            
+            }
         }
 
         public void CropRightColumns(int columnsToCrop)
@@ -101,8 +79,5 @@ namespace SeamCarver
 
             _image.Mutate(c => { c.Crop(w - columnsToCrop, h); });
         }
-
     }
 }
-
-
