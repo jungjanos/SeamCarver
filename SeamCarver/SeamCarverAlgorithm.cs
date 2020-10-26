@@ -1,7 +1,4 @@
-﻿using Common;
-using Common.ImageSharp;
-using System;
-using System.IO;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
