@@ -8,6 +8,9 @@ using Microsoft.Extensions.Logging;
 using WebUI.Models;
 using WebUI.Service;
 using Common;
+using Microsoft.AspNetCore.Authorization;
+using Data;
+using System.Linq;
 
 namespace WebUI.Controllers
 {
@@ -16,12 +19,14 @@ namespace WebUI.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly FileSystemHelper _fsHelper;
         private readonly ILogger<ImageController> _logger;
+        private readonly SeamCarverContext _db;
 
-        public ImageController(IWebHostEnvironment env, FileSystemHelper fsHelper, ILogger<ImageController> logger)
+        public ImageController(IWebHostEnvironment env, FileSystemHelper fsHelper, ILogger<ImageController> logger, SeamCarverContext db)
         {
             _env = env;
             _fsHelper = fsHelper;
             _logger = logger;
+            _db = db;
         }
 
         public IActionResult Index()
@@ -56,6 +61,13 @@ namespace WebUI.Controllers
             return View("Index", new ImageViewModel(targetFilename, null, null, origfilename, null));
         }
 
+        [AllowAnonymous]
+        public IActionResult Test()
+        {
+            var first = _db.Users.FirstOrDefault();
+
+            return new OkResult();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
