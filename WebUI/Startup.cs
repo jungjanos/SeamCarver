@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using WebUI.Filters;
 using WebUI.Service;
 
 namespace WebUI
@@ -56,6 +57,7 @@ namespace WebUI
                     .RequireAuthenticatedUser()
                     .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
+                options.Filters.Add<NewUserActionFilter>();
             });
 
             services.AddRazorPages()
@@ -86,7 +88,7 @@ namespace WebUI
             }
 
             if (env.IsDevelopment())
-            {// for debugging http message flow
+            {// only for debugging http message flow
                 app.Use((context, next) =>
                {
                    var ret = next.Invoke();
@@ -119,7 +121,8 @@ namespace WebUI
                 var user = db.Users.Find(new Guid(userObjectId));
 
                 if (user == null)
-                    validatedContext.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("new user", "true") }));
+                    //validatedContext.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("isNewUser", "true") }));
+                    ((ClaimsIdentity)validatedContext.Principal.Identity).AddClaim(new Claim("isNewUser", "true"));
             }
             await Task.CompletedTask;
         }
