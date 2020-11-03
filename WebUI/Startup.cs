@@ -22,12 +22,20 @@ namespace WebUI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        private string _webroot;
+        private string _userFolderBase;
 
         public IConfiguration Configuration { get; }
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment webhost)
+        {
+            Configuration = configuration;
+            _webroot = webhost.WebRootPath;
+            _userFolderBase = Path.Combine(_webroot, Configuration.GetValue<string>("UserFolderBase"));
+
+            if (!Directory.Exists(_userFolderBase)) // put this in a file helper
+                Directory.CreateDirectory(_userFolderBase);
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -47,9 +55,9 @@ namespace WebUI
                     o.TenantId = "common";
                     o.CallbackPath = "/signin-oidc";
                     o.Events.OnTokenValidated = validatedCtx => CheckAndMarkNewUser(validatedCtx);
-                }, subscribeToOpenIdConnectMiddlewareDiagnosticsEvents: true);
-
-
+                    //o.ClaimActions.Remove("iss");
+                    //o.ClaimActions.Remove("http://schemas.microsoft.com/identity/claims/tenantid");
+                }, subscribeToOpenIdConnectMiddlewareDiagnosticsEvents: true);            
 
             services.AddControllersWithViews(options =>
             {
@@ -63,14 +71,26 @@ namespace WebUI
             services.AddRazorPages()
                 .AddMicrosoftIdentityUI();
 
+            services.AddAuthorization(options =>
+                // authz policy to check claim that the signed principal does not yet have account in the application
+                options.AddPolicy("HasNoAccount", policy => policy.RequireClaim("hasAccount", new[] { "false" }))
+            );
+
             services.AddSingleton(typeof(FileSystemHelper), sp =>
             {
-                var webRoot = ((IWebHostEnvironment)sp.GetRequiredService<IWebHostEnvironment>()).WebRootPath;
+                var webRoot = _webroot;
                 var uploadBaseVirtual = "Uploads";
                 var uploadBasePhysical = Path.Combine(webRoot, uploadBaseVirtual);
                 return new FileSystemHelper(uploadBasePhysical, uploadBaseVirtual);
             });
 
+            services.AddScoped<IUserService>(services =>
+            {
+                var db = services.GetRequiredService<SeamCarverContext>();
+                return new UserService(db, _userFolderBase);
+            });
+
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -121,8 +141,9 @@ namespace WebUI
                 var user = db.Users.Find(new Guid(userObjectId));
 
                 if (user == null)
-                    //validatedContext.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("isNewUser", "true") }));
-                    ((ClaimsIdentity)validatedContext.Principal.Identity).AddClaim(new Claim("isNewUser", "true"));
+                    ((ClaimsIdentity)validatedContext.Principal.Identity).AddClaim(new Claim("hasAccount", "false"));
+                else
+                    ((ClaimsIdentity)validatedContext.Principal.Identity).AddClaim(new Claim("hasAccount", "true"));
             }
             await Task.CompletedTask;
         }

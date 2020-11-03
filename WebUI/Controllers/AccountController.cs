@@ -1,18 +1,73 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using WebUI.Service;
+using WebUI.ViewModels;
 
 namespace WebUI.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly IUserService _userService;
+
+        public AccountController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
+        [Authorize(Policy = "HasNoAccount")]
         public IActionResult NewUserGreeting()
         {
-            var id = (ClaimsIdentity)HttpContext.User.Identity;
-            var newUserClaim = id.FindFirst(c => c.Type == "isNewUser");
-            id.RemoveClaim(newUserClaim);            
+            var vm = new NewUserGreetingVm
+            {
+                Name = User.GetDisplayName(),
+                Email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
+            };
 
-            return View(id.Claims);
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "HasNoAccount")]
+        public async Task<IActionResult> NewUserGreeting(string returnUrl)
+        {
+            await _userService.AddNewUser(User);
+            await SetHasAccountClaim();
+
+            return RedirectToAction(nameof(UserClaims));
+        }
+
+        private async Task SetHasAccountClaim()
+        {
+            var result = await HttpContext.AuthenticateAsync();
+            var identity = (ClaimsIdentity)User.Identity;
+            var claimToRemove = identity.FindFirst( c => c.Type == "hasAccount" && c.Value == "false");
+            identity.RemoveClaim(claimToRemove);
+            identity.AddClaim(new Claim("hasAccount", "true"));
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, User, result.Properties);
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> RemoveClaim()
+        {
+            var result = await HttpContext.AuthenticateAsync();
+
+            var identity = (ClaimsIdentity)User.Identity;
+            var claimToRemove = identity.FindFirst("isNewUser");
+
+            if (claimToRemove != null)
+                identity.RemoveClaim(claimToRemove);
+
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, User, result.Properties);
+
+            return RedirectToAction(nameof(UserClaims));
         }
 
         [AllowAnonymous]

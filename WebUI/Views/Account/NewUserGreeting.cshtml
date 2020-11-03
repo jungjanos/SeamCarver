@@ -2,14 +2,18 @@
     ViewData["Title"] = "Greetings!";
 }
 
-@using System.Security.Claims
-
-@model IEnumerable<Claim>
 
 
-@{
-    //var name = Model.First()
-}
+@model WebUI.ViewModels.NewUserGreetingVm
 
-<p></p>
+
+<p>
+    Dear @Model.Name (@Model.Email), by clicking the below button you accept our terms of service and create a user profile.
+    A user profile will enable additional services...
+</p>
+
+<form method="post" asp-action="NewUserGreeting">
+    <input name="returnUrl" type="hidden" value="" />
+    <input type="submit" value="Submit">
+</form>
 

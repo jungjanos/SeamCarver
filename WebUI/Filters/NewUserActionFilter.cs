@@ -14,7 +14,7 @@ namespace WebUI.Filters
             if (context.Controller.GetType().FullName.Contains("AccountController"))
                 return;
 
-            if (context.HttpContext.User.HasClaim("isNewUser", "true"))
+            if (context.HttpContext.User.HasClaim("hasAccount", "false"))
                 context.Result = new RedirectToActionResult("NewUserGreeting", "Account", null);
         }
     }
