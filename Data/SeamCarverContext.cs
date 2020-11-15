@@ -16,7 +16,7 @@ namespace Data
     {
         public Guid Id { get; set; }        
         public string IdentityProvider { get; set; }
-        public string PrimaryDomain { get; set; }
+        public string TenantId { get; set; }
         public string LocalFolder { get; set; }
         public DateTime WhenCreated { get; set; }
         public DateTime WhenChanged { get; set; }

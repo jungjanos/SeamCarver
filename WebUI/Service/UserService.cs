@@ -59,9 +59,9 @@ namespace WebUI.Service
             var user = new ScUser
             {
                 Id = oid,
-                IdentityProvider = principal.GetTenantId(),
+                IdentityProvider = principal.Claims.First(c => c.Type == ClaimTypes.NameIdentifier)?.Issuer,
                 LocalFolder = userFolder,
-                PrimaryDomain = principal.GetHomeTenantId(),
+                TenantId = principal.GetTenantId(),
                 WhenCreated = now,
                 WhenChanged = now,
             };
