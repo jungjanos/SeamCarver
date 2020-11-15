@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "Delete account";
+}
+
+@using System.Security.Claims
+
+<p>
+    Dear @ViewBag.ClaimsIdentity.Name, do you realy wish to delete your account and personal folder on this site?
+    You will be able to create a new account whenever you wish.
+</p>
+
+<form method="post" asp-action="SelfRemove">
+    <input type="submit" value="Submit">
+</form>
+<button asp-controller="Image" asp-action="index">Cancel </button>

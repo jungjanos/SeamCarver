@@ -57,7 +57,7 @@ namespace WebUI
                     o.Events.OnTokenValidated = validatedCtx => CheckAndMarkNewUser(validatedCtx);
                     //o.ClaimActions.Remove("iss");
                     //o.ClaimActions.Remove("http://schemas.microsoft.com/identity/claims/tenantid");
-                }, subscribeToOpenIdConnectMiddlewareDiagnosticsEvents: true);            
+                }, subscribeToOpenIdConnectMiddlewareDiagnosticsEvents: true);
 
             services.AddControllersWithViews(options =>
             {
@@ -72,9 +72,11 @@ namespace WebUI
                 .AddMicrosoftIdentityUI();
 
             services.AddAuthorization(options =>
-                // authz policy to check claim that the signed principal does not yet have account in the application
-                options.AddPolicy("HasNoAccount", policy => policy.RequireClaim("hasAccount", new[] { "false" }))
-            );
+            // authz policy to check claim that the signed principal does not yet have account in the application
+            {
+                options.AddPolicy("HasNoAccount", policy => policy.RequireClaim("hasAccount", new[] { "false" }));
+                options.AddPolicy("HasAccount", policy => policy.RequireClaim("hasAccount", new[] { "true" }));
+            });
 
             services.AddSingleton(typeof(FileSystemHelper), sp =>
             {
@@ -90,7 +92,7 @@ namespace WebUI
                 return new UserService(db, _userFolderBase);
             });
 
-            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -29,7 +29,6 @@ namespace WebUI.Controllers
                 Email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
             };
 
-
             return View(vm);
         }
 
@@ -40,7 +39,7 @@ namespace WebUI.Controllers
             await _userService.AddNewUser(User);
             await SetHasAccountClaim();
 
-            return RedirectToAction(nameof(UserClaims));
+            return RedirectToAction(nameof(Info));
         }
 
         private async Task SetHasAccountClaim()
@@ -67,11 +66,30 @@ namespace WebUI.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, User, result.Properties);
 
-            return RedirectToAction(nameof(UserClaims));
+            return RedirectToAction(nameof(Info));
+        }
+        
+        [Authorize(Policy = "HasAccount")]
+        public IActionResult SelfRemove()
+        {
+            ViewBag.ClaimsIdentity = User.Identity;
+            ViewBag.Claims = User.Claims;
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "HasAccount")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SelfRemove(string _)
+        {
+            await _userService.RemoveUser(User);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return RedirectToAction("Index", "Image");
         }
 
         [AllowAnonymous]
-        public IActionResult UserClaims()
+        public IActionResult Info()
         {
             ViewBag.ClaimsIdentity = User.Identity;
             ViewBag.Claims = User.Claims;

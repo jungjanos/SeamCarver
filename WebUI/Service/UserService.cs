@@ -12,8 +12,22 @@ namespace WebUI.Service
 {
     public interface IUserService
     {
+        /// <summary> 
+        /// Creates an entry in the apps user table making the principal a recognized user. 
+        /// Also creates a work folder for the user. 
+        /// Throws exception if the principal does have not a valid objectidentifier claim or if the users folder already exists. 
+        /// </summary>                
         Task AddNewUser(ClaimsPrincipal principal);
         Task<ScUser> GetUser(Guid id);
+        /// <summary>
+        /// Removes the principals entry from the user table unmarking the principals as the apps user. 
+        /// Remove the users work folder if exists. 
+        /// Throws exception if the principal does not have a valid objectidentifier claim 
+        /// or if the users folder can not be deleted
+        /// </summary>
+        /// <param name="principal"></param>
+        /// <returns></returns>
+        Task RemoveUser(ClaimsPrincipal principal);
     }
 
     public class UserService : IUserService
@@ -27,20 +41,11 @@ namespace WebUI.Service
             _userFolderBase = userFolderBase;
         }
 
-        public async Task<ScUser> GetUser(Guid id)
-        {
-            return await _db.Users.FindAsync(id);
-        }
+        public async Task<ScUser> GetUser(Guid id) => await _db.Users.FindAsync(id);
 
         public async Task AddNewUser(ClaimsPrincipal principal)
         {
-            var id = principal.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
-
-            if (string.IsNullOrEmpty(id))
-                throw new Exception("Claimsprincipal lacks objectidentifier claim");
-
-            if (!Guid.TryParse(id, out Guid oid))
-                throw new Exception($"{id} : objectidentifier claim value is of wrong format. GUID format required");
+            Guid oid = GetPrincipalObjectId(principal);
 
             if (await (GetUser(oid)) != null)
                 throw new Exception($"User with id {oid} is already in the database");
@@ -54,15 +59,27 @@ namespace WebUI.Service
             var user = new ScUser
             {
                 Id = oid,
-                IdentityProvider = "",
+                IdentityProvider = principal.GetTenantId(),
                 LocalFolder = userFolder,
-                PrimaryDomain = "",
+                PrimaryDomain = principal.GetHomeTenantId(),
                 WhenCreated = now,
                 WhenChanged = now,
             };
 
             await _db.AddAsync(user);
             await _db.SaveChangesAsync();
+        }
+
+        private Guid GetPrincipalObjectId(ClaimsPrincipal principal)
+        {
+            var id = principal.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
+
+            if (string.IsNullOrEmpty(id))
+                throw new Exception("Claimsprincipal lacks objectidentifier claim");
+
+            if (!Guid.TryParse(id, out Guid oid))
+                throw new Exception($"{id} : objectidentifier claim value is of wrong format. GUID format required");
+            return oid;
         }
 
         /// <summary>Calculates a valid name for a new user folder and creates that folder</summary>
@@ -93,6 +110,22 @@ namespace WebUI.Service
                 throw new Exception($"{fullPath} : folder already exists ");
 
             Directory.CreateDirectory(fullPath);
+        }
+    
+        public async Task RemoveUser(ClaimsPrincipal principal)
+        {
+            Guid oid = GetPrincipalObjectId(principal);
+            var user = await GetUser(oid);
+
+            if (user != null)
+            {
+
+                _db.Remove(user);
+                await _db.SaveChangesAsync();
+
+                string userFolder = Path.Combine(_userFolderBase, user.LocalFolder);
+                Directory.Delete(userFolder, recursive: true);
+            }
         }
     }
 }
