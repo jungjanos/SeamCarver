@@ -19,6 +19,8 @@ namespace WebUI.Service
         /// </summary>                
         Task AddNewUser(ClaimsPrincipal principal);
         Task<ScUser> GetUser(Guid id);
+        /// <summary>id must be a GUID </summary>
+        Task<ScUser> GetUser(string id);
         /// <summary>
         /// Removes the principals entry from the user table unmarking the principals as the apps user. 
         /// Remove the users work folder if exists. 
@@ -28,6 +30,17 @@ namespace WebUI.Service
         /// <param name="principal"></param>
         /// <returns></returns>
         Task RemoveUser(ClaimsPrincipal principal);
+        /// <summary>
+        /// Sets hasAccount = "true" claim. Removes hasAccount = "false" if present
+        /// </summary>
+        /// <param name="principal">User with hasAccount = "false" claim</param>
+        void SetHasAccountClaim(ClaimsPrincipal principal);
+        /// <summary>
+        /// Retreives users local folder from DB and sets "LocalFolder" claim to users folder.
+        /// Throws if user is not present in the DB
+        /// </summary>
+        /// <param name="principal">Application users principal</param>
+        Task SetLocalFolderClaim(ClaimsPrincipal principal);
     }
 
     public class UserService : IUserService
@@ -42,6 +55,7 @@ namespace WebUI.Service
         }
 
         public async Task<ScUser> GetUser(Guid id) => await _db.Users.FindAsync(id);
+        public async Task<ScUser> GetUser(string id) => await GetUser(Guid.Parse(id));
 
         public async Task AddNewUser(ClaimsPrincipal principal)
         {
@@ -111,7 +125,7 @@ namespace WebUI.Service
 
             Directory.CreateDirectory(fullPath);
         }
-    
+
         public async Task RemoveUser(ClaimsPrincipal principal)
         {
             Guid oid = GetPrincipalObjectId(principal);
@@ -126,6 +140,34 @@ namespace WebUI.Service
                 string userFolder = Path.Combine(_userFolderBase, user.LocalFolder);
                 Directory.Delete(userFolder, recursive: true);
             }
+        }
+
+        public void SetHasAccountClaim(ClaimsPrincipal principal)
+        {
+            var identity = (ClaimsIdentity)principal.Identity;
+            var claimToRemove = identity.FindFirst(c => c.Type == "hasAccount" && c.Value == "false");
+            
+            if (claimToRemove != null)
+                identity.RemoveClaim(claimToRemove);
+
+            identity.AddClaim(new Claim("hasAccount", "true"));
+        }
+
+        public async Task SetLocalFolderClaim(ClaimsPrincipal principal)
+        {
+            var oid = principal.GetObjectId();
+
+            if (oid == null)
+                throw new ArgumentException("A valid objectidentifier claim must be set", nameof(principal));
+
+            var user = await GetUser(oid);
+
+            if (user == null)
+                throw new ArgumentException("user not found in DB", nameof(principal));
+
+            var identity = (ClaimsIdentity)principal.Identity;            
+
+            identity.AddClaim(new Claim("LocalFolder", user.LocalFolder));
         }
     }
 }

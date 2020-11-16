@@ -10,18 +10,17 @@ using WebUI.Service;
 using Common;
 using Microsoft.AspNetCore.Authorization;
 using Data;
-using System.Linq;
 
 namespace WebUI.Controllers
 {
     public class ImageController : Controller
     {
         private readonly IWebHostEnvironment _env;
-        private readonly FileSystemHelper _fsHelper;
+        private readonly UserFileSystemHelper _fsHelper;
         private readonly ILogger<ImageController> _logger;
         private readonly SeamCarverContext _db;
 
-        public ImageController(IWebHostEnvironment env, FileSystemHelper fsHelper, ILogger<ImageController> logger, SeamCarverContext db)
+        public ImageController(IWebHostEnvironment env, UserFileSystemHelper fsHelper, ILogger<ImageController> logger, SeamCarverContext db)
         {
             _env = env;
             _fsHelper = fsHelper;
@@ -35,12 +34,13 @@ namespace WebUI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "HasAccount")]
         public async Task<IActionResult> UploadImage(IFormFile uploadimage)
         {
             if (uploadimage.Length > 0 && uploadimage.ContentType.Contains("image"))
             {
                 var localFileName = await _fsHelper.SaveUploadFileToRandomFile(uploadimage.FileName, uploadimage.OpenReadStream());                
-                return View("Index", new ImageViewModel(localFileName, origFileName: uploadimage.FileName));                
+                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, localFileName, origFileName: uploadimage.FileName));                
             }
             else
             {
@@ -51,6 +51,7 @@ namespace WebUI.Controllers
 
 
         [HttpPost]
+        [Authorize(Policy = "HasAccount")]
         public IActionResult CarveImage(string filename, string origfilename, int columnsToCarve)
         {
             var physicalPath = _fsHelper.PrependPhysicalFolderPath(filename);
@@ -58,15 +59,7 @@ namespace WebUI.Controllers
 
             SeamCarver.SeamCarverWrapper.CarveVertically(physicalPath, columnsToCarve, _fsHelper.PrependPhysicalFolderPath(targetFilename), ImageFormat.jpeg, CancellationToken.None);
 
-            return View("Index", new ImageViewModel(targetFilename, null, null, origfilename, null));
-        }
-
-        [AllowAnonymous]
-        public IActionResult Test()
-        {
-            var first = _db.Users.FirstOrDefault();
-
-            return new OkResult();
+            return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, targetFilename, null, null, origfilename, null));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

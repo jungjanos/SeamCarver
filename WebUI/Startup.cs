@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +24,8 @@ namespace WebUI
     public class Startup
     {
         private string _webroot;
-        private string _userFolderBase;
+        private string _userFolderPhysicalBase;
+        private string _userFolderVirtualBase;
 
         public IConfiguration Configuration { get; }
 
@@ -31,15 +33,17 @@ namespace WebUI
         {
             Configuration = configuration;
             _webroot = webhost.WebRootPath;
-            _userFolderBase = Path.Combine(_webroot, Configuration.GetValue<string>("UserFolderBase"));
+            _userFolderPhysicalBase = Path.Combine(_webroot, Configuration.GetValue<string>("UserFolderBase"));
+            _userFolderVirtualBase = Configuration.GetValue<string>("UserFolderBase");
 
-            if (!Directory.Exists(_userFolderBase)) // put this in a file helper
-                Directory.CreateDirectory(_userFolderBase);
+            if (!Directory.Exists(_userFolderPhysicalBase)) // put this in a file helper
+                Directory.CreateDirectory(_userFolderPhysicalBase);
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
             services.AddDbContext<SeamCarverContext>(options => options.UseSqlServer(Configuration.GetConnectionString("default")));
 
             //services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
@@ -78,18 +82,21 @@ namespace WebUI
                 options.AddPolicy("HasAccount", policy => policy.RequireClaim("hasAccount", new[] { "true" }));
             });
 
-            services.AddSingleton(typeof(FileSystemHelper), sp =>
+
+            services.AddScoped(typeof(UserFileSystemHelper), sp =>
             {
-                var webRoot = _webroot;
-                var uploadBaseVirtual = "Uploads";
-                var uploadBasePhysical = Path.Combine(webRoot, uploadBaseVirtual);
-                return new FileSystemHelper(uploadBasePhysical, uploadBaseVirtual);
+
+                var principal = sp.GetService<IHttpContextAccessor>().HttpContext.User;
+
+                var userFolder = principal?.Claims?.FirstOrDefault(c => c.Type == "LocalFolder")?.Value;
+
+                return new UserFileSystemHelper(_userFolderPhysicalBase, _userFolderVirtualBase, userFolder);
             });
 
             services.AddScoped<IUserService>(services =>
             {
                 var db = services.GetRequiredService<SeamCarverContext>();
-                return new UserService(db, _userFolderBase);
+                return new UserService(db, _userFolderPhysicalBase);
             });
 
 
@@ -140,14 +147,16 @@ namespace WebUI
 
             using (var db = validatedContext.HttpContext.RequestServices.GetRequiredService<SeamCarverContext>())
             {
-                var user = db.Users.Find(new Guid(userObjectId));
+                var user = await db.Users.FindAsync(new Guid(userObjectId));
 
                 if (user == null)
                     ((ClaimsIdentity)validatedContext.Principal.Identity).AddClaim(new Claim("hasAccount", "false"));
                 else
+                {
                     ((ClaimsIdentity)validatedContext.Principal.Identity).AddClaim(new Claim("hasAccount", "true"));
+                    ((ClaimsIdentity)validatedContext.Principal.Identity).AddClaim(new Claim("LocalFolder", user.LocalFolder));
+                }
             }
-            await Task.CompletedTask;
         }
     }
 }

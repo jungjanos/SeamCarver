@@ -37,19 +37,13 @@ namespace WebUI.Controllers
         public async Task<IActionResult> NewUserGreeting(string returnUrl)
         {
             await _userService.AddNewUser(User);
-            await SetHasAccountClaim();
 
-            return RedirectToAction(nameof(Info));
-        }
-
-        private async Task SetHasAccountClaim()
-        {
             var result = await HttpContext.AuthenticateAsync();
-            var identity = (ClaimsIdentity)User.Identity;
-            var claimToRemove = identity.FindFirst( c => c.Type == "hasAccount" && c.Value == "false");
-            identity.RemoveClaim(claimToRemove);
-            identity.AddClaim(new Claim("hasAccount", "true"));
+            _userService.SetHasAccountClaim(User);
+            await _userService.SetLocalFolderClaim(User);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, User, result.Properties);
+                        
+            return RedirectToAction(nameof(Info));
         }
 
         [AllowAnonymous]
