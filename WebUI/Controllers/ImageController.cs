@@ -40,7 +40,7 @@ namespace WebUI.Controllers
             if (uploadimage.Length > 0 && uploadimage.ContentType.Contains("image"))
             {
                 var localFileName = await _fsHelper.SaveUploadFileToRandomFile(uploadimage.FileName, uploadimage.OpenReadStream());
-                await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageUpload, null, uploadimage.FileName, uploadimage.Length.ToString());
+                await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageUpload, null, uploadimage.FileName, uploadimage.Length);
 
                 return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, localFileName, origFileName: uploadimage.FileName));
             }
@@ -54,12 +54,13 @@ namespace WebUI.Controllers
 
         [HttpPost]
         [Authorize(Policy = "HasAccount")]
-        public IActionResult CarveImage(string filename, string origfilename, int columnsToCarve)
+        public async Task<IActionResult> CarveImage(string filename, string origfilename, int columnsToCarve)
         {
             var physicalPath = _fsHelper.PrependPhysicalFolderPath(filename);
             var targetFilename = _fsHelper.CreateRandomFilename(origfilename);
 
             SeamCarver.SeamCarverWrapper.CarveVertically(physicalPath, columnsToCarve, _fsHelper.PrependPhysicalFolderPath(targetFilename), ImageFormat.jpeg, CancellationToken.None);
+            await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageCarving, null, origfilename, filename, columnsToCarve);
 
             return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, targetFilename, null, null, origfilename, null));
         }

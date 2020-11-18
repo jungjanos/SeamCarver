@@ -13,15 +13,15 @@ namespace WebUI.Service
             _db = db;
         }
 
-        public async Task CreateHistoryEntry(Guid userId, ActionType actionType, string description, params string[] parameters)
+        public async Task CreateHistoryEntry(Guid userId, ActionType actionType, string description, params object[] parameters)
         {
             var paramLen = parameters?.Length ?? 0;
 
-            string p0 = 0 < paramLen ? parameters[0] : null;
-            string p1 = 1 < paramLen ? parameters[1] : null;
-            string p2 = 2 < paramLen ? parameters[2] : null;
-            string p3 = 3 < paramLen ? parameters[3] : null;
-            string p4 = 4 < paramLen ? parameters[4] : null;
+            string p0 = 0 < paramLen ? parameters[0]?.ToString() : null;
+            string p1 = 1 < paramLen ? parameters[1]?.ToString() : null;
+            string p2 = 2 < paramLen ? parameters[2]?.ToString() : null;
+            string p3 = 3 < paramLen ? parameters[3]?.ToString() : null;
+            string p4 = 4 < paramLen ? parameters[4]?.ToString() : null;
 
             var action = new UserAction
             {
@@ -40,7 +40,7 @@ namespace WebUI.Service
             await _db.SaveChangesAsync();
         }
 
-        public Task CreateHistoryEntry(string userId, ActionType actionType, string description, params string[] parameters)
+        public Task CreateHistoryEntry(string userId, ActionType actionType, string description, params object[] parameters)
         {
             if (Guid.TryParse(userId, out Guid userIdGuid))
                 return CreateHistoryEntry(userIdGuid, actionType, description, parameters);

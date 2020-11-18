@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Data;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,12 @@ namespace WebUI.Controllers
     public class AccountController : Controller
     {
         private readonly IUserService _userService;
+        private readonly ActionHistoryPersister _historyPersister;
 
-        public AccountController(IUserService userService)
+        public AccountController(IUserService userService, ActionHistoryPersister historyPersister)
         {
             _userService = userService;
+            _historyPersister = historyPersister;
         }
 
         [Authorize(Policy = "HasNoAccount")]
@@ -37,6 +40,7 @@ namespace WebUI.Controllers
         public async Task<IActionResult> NewUserGreeting(string returnUrl)
         {
             await _userService.AddNewUser(User);
+            await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.AccountCreation, "User created account", User?.GetDisplayName(), User.GetLoginHint(), User.Identity.AuthenticationType, User.GetTenantId());
 
             var result = await HttpContext.AuthenticateAsync();
             _userService.SetHasAccountClaim(User);
@@ -76,6 +80,8 @@ namespace WebUI.Controllers
         public async Task<IActionResult> SelfRemove(string _)
         {
             await _userService.RemoveUser(User);
+            await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.AccountDeletion, "User account self removal", User?.GetDisplayName(), User.GetLoginHint(), User.Identity.AuthenticationType, User.GetTenantId());
+
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             return RedirectToAction("Index", "Image");
