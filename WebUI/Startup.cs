@@ -82,10 +82,8 @@ namespace WebUI
                 options.AddPolicy("HasAccount", policy => policy.RequireClaim("hasAccount", new[] { "true" }));
             });
 
-
             services.AddScoped(typeof(UserFileSystemHelper), sp =>
             {
-
                 var principal = sp.GetService<IHttpContextAccessor>().HttpContext.User;
 
                 var userFolder = principal?.Claims?.FirstOrDefault(c => c.Type == "LocalFolder")?.Value;
@@ -99,7 +97,7 @@ namespace WebUI
                 return new UserService(db, _userFolderPhysicalBase);
             });
 
-
+            services.AddScoped<ActionHistoryPersister>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

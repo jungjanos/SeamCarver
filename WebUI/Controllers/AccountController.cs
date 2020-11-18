@@ -57,7 +57,6 @@ namespace WebUI.Controllers
             if (claimToRemove != null)
                 identity.RemoveClaim(claimToRemove);
 
-
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, User, result.Properties);
 
             return RedirectToAction(nameof(Info));

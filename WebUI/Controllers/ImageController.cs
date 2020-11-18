@@ -10,22 +10,22 @@ using WebUI.Service;
 using Common;
 using Microsoft.AspNetCore.Authorization;
 using Data;
+using Microsoft.Identity.Web;
 
 namespace WebUI.Controllers
 {
     public class ImageController : Controller
     {
-        private readonly IWebHostEnvironment _env;
-        private readonly UserFileSystemHelper _fsHelper;
-        private readonly ILogger<ImageController> _logger;
-        private readonly SeamCarverContext _db;
 
-        public ImageController(IWebHostEnvironment env, UserFileSystemHelper fsHelper, ILogger<ImageController> logger, SeamCarverContext db)
+        private readonly UserFileSystemHelper _fsHelper;
+        private readonly ActionHistoryPersister _historyPersister;
+        private readonly ILogger<ImageController> _logger;
+
+        public ImageController(UserFileSystemHelper fsHelper, ActionHistoryPersister historyPersister, ILogger<ImageController> logger)
         {
-            _env = env;
             _fsHelper = fsHelper;
+            _historyPersister = historyPersister;
             _logger = logger;
-            _db = db;
         }
 
         public IActionResult Index()
@@ -39,8 +39,10 @@ namespace WebUI.Controllers
         {
             if (uploadimage.Length > 0 && uploadimage.ContentType.Contains("image"))
             {
-                var localFileName = await _fsHelper.SaveUploadFileToRandomFile(uploadimage.FileName, uploadimage.OpenReadStream());                
-                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, localFileName, origFileName: uploadimage.FileName));                
+                var localFileName = await _fsHelper.SaveUploadFileToRandomFile(uploadimage.FileName, uploadimage.OpenReadStream());
+                await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageUpload, null, uploadimage.FileName, uploadimage.Length.ToString());
+
+                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, localFileName, origFileName: uploadimage.FileName));
             }
             else
             {
@@ -55,7 +57,7 @@ namespace WebUI.Controllers
         public IActionResult CarveImage(string filename, string origfilename, int columnsToCarve)
         {
             var physicalPath = _fsHelper.PrependPhysicalFolderPath(filename);
-            var targetFilename = _fsHelper.CreateRandomFilename(origfilename);            
+            var targetFilename = _fsHelper.CreateRandomFilename(origfilename);
 
             SeamCarver.SeamCarverWrapper.CarveVertically(physicalPath, columnsToCarve, _fsHelper.PrependPhysicalFolderPath(targetFilename), ImageFormat.jpeg, CancellationToken.None);
 
