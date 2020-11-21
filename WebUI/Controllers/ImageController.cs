@@ -36,8 +36,8 @@ namespace WebUI.Controllers
         [HttpPost]
         [Authorize(Policy = "HasAccount")]
         public async Task<IActionResult> UploadImage(IFormFile uploadimage)
-        {
-            if (uploadimage.Length > 0 && uploadimage.ContentType.Contains("image"))
+        {   
+            if (uploadimage?.Length > 0 && uploadimage.ContentType.Contains("image"))
             {
                 var localFileName = await _fsHelper.SaveUploadFileToRandomFile(uploadimage.FileName, uploadimage.OpenReadStream());
                 await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageUpload, null, uploadimage.FileName, uploadimage.Length);
