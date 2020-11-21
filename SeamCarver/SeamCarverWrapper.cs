@@ -22,7 +22,7 @@ namespace SeamCarver
                 int imageHeight = image.Height;
 
                 if (imageWidth < 4)
-                    throw new ArgumentOutOfRangeException("Image too small for carving, at least with of 4 is required");
+                    throw new ArgumentOutOfRangeException("Image too small for carving, at least width of 4 is required");
 
                 if (columnsToCarve < 1 || columnsToCarve > imageWidth - 3)
                     throw new ArgumentOutOfRangeException($"Number of columns to carve is out of range: 1 - {imageWidth - 3}");

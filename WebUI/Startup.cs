@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Common;
+using Common.ImageSharp;
 using Data;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
@@ -45,9 +47,6 @@ namespace WebUI
         {
             services.AddHttpContextAccessor();
             services.AddDbContext<SeamCarverContext>(options => options.UseSqlServer(Configuration.GetConnectionString("default")));
-
-            //services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-            //    .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"), subscribeToOpenIdConnectMiddlewareDiagnosticsEvents: true);
 
             services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(o =>
@@ -98,6 +97,7 @@ namespace WebUI
             });
 
             services.AddScoped<ActionHistoryPersister>();
+            services.AddSingleton<IImageDetailService, ImageDetailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

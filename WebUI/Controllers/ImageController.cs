@@ -20,11 +20,13 @@ namespace WebUI.Controllers
         private readonly UserFileSystemHelper _fsHelper;
         private readonly ActionHistoryPersister _historyPersister;
         private readonly ILogger<ImageController> _logger;
+        private readonly IImageDetailService _imageDetailService;
 
-        public ImageController(UserFileSystemHelper fsHelper, ActionHistoryPersister historyPersister, ILogger<ImageController> logger)
+        public ImageController(UserFileSystemHelper fsHelper, ActionHistoryPersister historyPersister, IImageDetailService imageDetailService, ILogger<ImageController> logger)
         {
             _fsHelper = fsHelper;
             _historyPersister = historyPersister;
+            _imageDetailService = imageDetailService;
             _logger = logger;
         }
 
@@ -36,13 +38,17 @@ namespace WebUI.Controllers
         [HttpPost]
         [Authorize(Policy = "HasAccount")]
         public async Task<IActionResult> UploadImage(IFormFile uploadimage)
-        {   
+        {
             if (uploadimage?.Length > 0 && uploadimage.ContentType.Contains("image"))
             {
                 var localFileName = await _fsHelper.SaveUploadFileToRandomFile(uploadimage.FileName, uploadimage.OpenReadStream());
-                await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageUpload, null, uploadimage.FileName, uploadimage.Length);
+                var details = await _imageDetailService.GetDetailsAsync(_fsHelper.PrependPhysicalFolderPath(localFileName));
 
-                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, localFileName, origFileName: uploadimage.FileName));
+                await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageUpload, null, uploadimage.FileName, uploadimage.Length, $"{details.Width} x {details.Height}");
+
+                var image = new ImageViewModel(_fsHelper.UserVirtualFolder, localFileName, details.Width, details.Height, details.Size, origFileName: uploadimage.FileName);
+
+                return View("Index", image);
             }
             else
             {
@@ -61,12 +67,15 @@ namespace WebUI.Controllers
                 var physicalPath = _fsHelper.PrependPhysicalFolderPath(filename);
                 var targetFilename = _fsHelper.CreateRandomFilename(origfilename);
                 SeamCarver.SeamCarverWrapper.CarveVertically(physicalPath, columnsToCarve, _fsHelper.PrependPhysicalFolderPath(targetFilename), ImageFormat.jpeg, CancellationToken.None);
-                await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageCarving, null, origfilename, filename, columnsToCarve);
 
-                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, targetFilename, null, null, origfilename, null));
+                var details = await _imageDetailService.GetDetailsAsync(_fsHelper.PrependPhysicalFolderPath(targetFilename));
+
+                await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageCarving, null, origfilename, filename, columnsToCarve, details.Size, $"{details.Width} x {details.Height}");
+
+                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, targetFilename, details.Width, details.Height, details.Size, origfilename));
             }
             else
-                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, filename, null, null, origfilename, null));
+                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, filename, null, null, null, origfilename));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
