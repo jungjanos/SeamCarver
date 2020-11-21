@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using SeamCarver;
 using WebUI.Filters;
 using WebUI.Service;
 
@@ -98,6 +99,7 @@ namespace WebUI
 
             services.AddScoped<ActionHistoryPersister>();
             services.AddSingleton<IImageDetailService, ImageDetailService>();
+            services.AddTransient<ISeamCarverService, SeamCarverService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -11,19 +11,21 @@ using Microsoft.AspNetCore.Authorization;
 using Data;
 using Microsoft.Identity.Web;
 using System.ComponentModel.DataAnnotations;
+using SeamCarver;
 
 namespace WebUI.Controllers
 {
     public class ImageController : Controller
     {
-
+        private readonly ISeamCarverService _seamCarver;
         private readonly UserFileSystemHelper _fsHelper;
         private readonly ActionHistoryPersister _historyPersister;
         private readonly ILogger<ImageController> _logger;
         private readonly IImageDetailService _imageDetailService;
 
-        public ImageController(UserFileSystemHelper fsHelper, ActionHistoryPersister historyPersister, IImageDetailService imageDetailService, ILogger<ImageController> logger)
+        public ImageController(ISeamCarverService seamCarver, UserFileSystemHelper fsHelper, ActionHistoryPersister historyPersister, IImageDetailService imageDetailService, ILogger<ImageController> logger)
         {
+            _seamCarver = seamCarver;
             _fsHelper = fsHelper;
             _historyPersister = historyPersister;
             _imageDetailService = imageDetailService;
@@ -57,7 +59,6 @@ namespace WebUI.Controllers
             }
         }
 
-
         [HttpPost]
         [Authorize(Policy = "HasAccount")]
         public async Task<IActionResult> CarveImage(string filename, string origfilename, [Range(1, int.MaxValue)] int columnsToCarve)
@@ -66,7 +67,7 @@ namespace WebUI.Controllers
             {
                 var physicalPath = _fsHelper.PrependPhysicalFolderPath(filename);
                 var targetFilename = _fsHelper.CreateRandomFilename(origfilename);
-                SeamCarver.SeamCarverWrapper.CarveVertically(physicalPath, columnsToCarve, _fsHelper.PrependPhysicalFolderPath(targetFilename), ImageFormat.jpeg, CancellationToken.None);
+                _seamCarver.CarveVertically(physicalPath, columnsToCarve, _fsHelper.PrependPhysicalFolderPath(targetFilename), ImageFormat.jpeg, CancellationToken.None);
 
                 var details = await _imageDetailService.GetDetailsAsync(_fsHelper.PrependPhysicalFolderPath(targetFilename));
 
@@ -75,7 +76,10 @@ namespace WebUI.Controllers
                 return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, targetFilename, details.Width, details.Height, details.Size, origfilename));
             }
             else
-                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, filename, null, null, null, origfilename));
+            {
+                var details = await _imageDetailService.GetDetailsAsync(_fsHelper.PrependPhysicalFolderPath(filename));
+                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, filename, details.Width, details.Height, details.Size, origfilename));
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

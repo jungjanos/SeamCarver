@@ -6,16 +6,21 @@ using System.Threading;
 
 namespace SeamCarver
 {
-    public static class SeamCarverWrapper
+    public interface ISeamCarverService
     {
-        public static void CarveVertically(string imagePath, int columnsToCarve, string savePath, ImageFormat outputFormat, CancellationToken cancel, bool crop = true)
+        void CarveVertically(string imagePath, int columnsToCarve, string savePath, ImageFormat outputFormat, CancellationToken cancel, bool crop = true);
+    }
+
+    public class SeamCarverService : ISeamCarverService
+    {
+        public void CarveVertically(string imagePath, int columnsToCarve, string savePath, ImageFormat outputFormat, CancellationToken cancel, bool crop = true)
         {
             cancel.ThrowIfCancellationRequested();
 
             if (File.Exists(savePath))
                 throw new IOException($"there is already a file under the path {savePath}");
 
-            using (var image = ImageWrapper.Create(imagePath))            
+            using (var image = ImageWrapper.Create(imagePath))
             using (var outFs = File.OpenWrite(savePath))
             {
                 int imageWidth = image.Width;
