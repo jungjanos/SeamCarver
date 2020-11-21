@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -11,6 +10,7 @@ using Common;
 using Microsoft.AspNetCore.Authorization;
 using Data;
 using Microsoft.Identity.Web;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebUI.Controllers
 {
@@ -54,15 +54,19 @@ namespace WebUI.Controllers
 
         [HttpPost]
         [Authorize(Policy = "HasAccount")]
-        public async Task<IActionResult> CarveImage(string filename, string origfilename, int columnsToCarve)
+        public async Task<IActionResult> CarveImage(string filename, string origfilename, [Range(1, int.MaxValue)] int columnsToCarve)
         {
-            var physicalPath = _fsHelper.PrependPhysicalFolderPath(filename);
-            var targetFilename = _fsHelper.CreateRandomFilename(origfilename);
+            if (ModelState.IsValid)
+            {
+                var physicalPath = _fsHelper.PrependPhysicalFolderPath(filename);
+                var targetFilename = _fsHelper.CreateRandomFilename(origfilename);
+                SeamCarver.SeamCarverWrapper.CarveVertically(physicalPath, columnsToCarve, _fsHelper.PrependPhysicalFolderPath(targetFilename), ImageFormat.jpeg, CancellationToken.None);
+                await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageCarving, null, origfilename, filename, columnsToCarve);
 
-            SeamCarver.SeamCarverWrapper.CarveVertically(physicalPath, columnsToCarve, _fsHelper.PrependPhysicalFolderPath(targetFilename), ImageFormat.jpeg, CancellationToken.None);
-            await _historyPersister.CreateHistoryEntry(User.GetObjectId(), ActionType.ImageCarving, null, origfilename, filename, columnsToCarve);
-
-            return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, targetFilename, null, null, origfilename, null));
+                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, targetFilename, null, null, origfilename, null));
+            }
+            else
+                return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, filename, null, null, origfilename, null));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
