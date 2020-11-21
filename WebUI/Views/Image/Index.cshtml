@@ -7,68 +7,68 @@
 @if (Model.OrigFileName == null)
 {
 
-<div class="row">
-    <div class="col-sm-8">
-        <div class="alert alert-info" role="alert">
-            Upload image first
+    <div class="row">
+        <div class="col-sm-8">
+            <div class="alert alert-info" role="alert">
+                Upload image first
+            </div>
+        </div>
+        <div class="input-group col-sm-4">
+            <form method="post" asp-controller="Image" enctype="multipart/form-data" asp-action="UploadImage">
+                <button type="submit" class="btn btn-primary">Upload</button>
+                <input type="file" class="form-control-file" name="uploadimage">
+            </form>
         </div>
     </div>
-    <div class="input-group col-sm-4">
-        <form method="post" asp-controller="Image" enctype="multipart/form-data" asp-action="UploadImage">
-            <button type="submit" class="btn btn-primary">Upload</button>
-            <input type="file" class="form-control-file" name="uploadimage">
-        </form>
+    <div class="row">
+        <div class="col-sm-8">
+            <img src="~/placeholder.png" class="img-fluid" />
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-sm-8">
-        <img src="~/placeholder.png" class="img-fluid" />
-    </div>
-</div>
-        }
-        else
-        {
-<div class="row">
-    <div class="col-sm-8">
-        <img src="~/@Model.VirtualFolder/@Model.Filename" class="img-fluid" asp-append-version="true" />
-    </div>
-    <div class="col-sm-4">
-        <table class="table table-borderless">
-            <tbody>
-                <tr>
-                    <td>Orig. name</td>
-                    <td>@Model.OrigFileName</td>
-                </tr>
-                <tr>
-                    <td>Working name</td>
-                    <td>@Model.Filename</td>
-                </tr>
-                <tr>
-                    <td>width</td>
-                    <td>@Model.Width</td>
-                </tr>
-                <tr>
-                    <td>height</td>
-                    <td>@Model.Height</td>
-                </tr>
-            </tbody>
-        </table>
+}
+else
+{
+    <div class="row">
+        <div class="col-sm-8">
+            <img src="~/@Model.VirtualFolder/@Model.Filename" class="img-fluid" asp-append-version="true" />
+        </div>
+        <div class="col-sm-4">
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td>Orig. name</td>
+                        <td>@Model.OrigFileName</td>
+                    </tr>
+                    <tr>
+                        <td>Working name</td>
+                        <td>@Model.Filename</td>
+                    </tr>
+                    <tr>
+                        <td>width</td>
+                        <td>@Model.Width</td>
+                    </tr>
+                    <tr>
+                        <td>height</td>
+                        <td>@Model.Height</td>
+                    </tr>
+                </tbody>
+            </table>
 
 
-        <form method="post" asp-controller="Image" enctype="multipart/form-data" asp-action="CarveImage">
-            <div class="form-group">
-                <input type="hidden" name="filename" value="@Model.Filename">
-            </div>
-            <div class="form-group">
-                <input type="hidden" name="origfilename" value="@Model.OrigFileName">
-            </div>
-            <div class="form-group">
-                <label for="columnsToCarve">Columns to carve</label>
-                <input type="number" placeholder=0 name="columnsToCarve">
-            </div>
-            <button type="submit" class="btn btn-primary">Carve!</button>
-            <button type="button" class="btn btn-danger" asp-controller="Image" asp-action="Index">Reset</button>
-        </form>
+            <form method="post" asp-controller="Image" enctype="multipart/form-data" asp-action="CarveImage">
+                <div class="form-group">
+                    <input type="hidden" name="filename" value="@Model.Filename">
+                </div>
+                <div class="form-group">
+                    <input type="hidden" name="origfilename" value="@Model.OrigFileName">
+                </div>
+                <div class="form-group">
+                    <label for="columnsToCarve">Columns to carve</label>
+                    <input type="number" placeholder=0 name="columnsToCarve">
+                </div>
+                <button type="submit" class="btn btn-primary">Carve!</button>
+                <a class="btn btn-danger" asp-controller="Image" asp-action="Index">Reset</a>
+            </form>
+        </div>
     </div>
-</div>
-        }
+}
