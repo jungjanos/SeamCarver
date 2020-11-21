@@ -15,7 +15,7 @@ namespace SeamCarver
             if (File.Exists(savePath))
                 throw new IOException($"there is already a file under the path {savePath}");
 
-            using (var image = ImageWrapper.LoadImageAsWrappedRgba(imagePath))
+            using (var image = ImageWrapper.Create(imagePath))            
             using (var outFs = File.OpenWrite(savePath))
             {
                 int imageWidth = image.Width;
@@ -38,7 +38,7 @@ namespace SeamCarver
                 if (crop)
                     image.CropRightColumns(columnsToCarve);
 
-                image.Save(outFs, outputFormat);
+                image.SaveTo(outFs, outputFormat);
             }
         }
     }

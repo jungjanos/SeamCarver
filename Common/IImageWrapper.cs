@@ -4,7 +4,7 @@ namespace Common
 {
     public interface IImageWrapper
     {
-        Span<uint> GetAllRaws { get; }
+        Span<uint> GetAllRows { get; }
         int Height { get; }
         int Width { get; }
 
