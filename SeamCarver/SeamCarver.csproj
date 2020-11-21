@@ -14,10 +14,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Common.ImageSharp\Common.ImageSharp.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
