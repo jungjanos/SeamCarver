@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <StartupObject>WebUI.Program</StartupObject>
+    <UserSecretsId>15122604-40f6-4f49-9640-8c30c8c96b94</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
