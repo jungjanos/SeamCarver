@@ -1,12 +1,12 @@
-﻿using Data;
+﻿using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using Data;
 using WebUI.Service;
 using WebUI.ViewModels;
 

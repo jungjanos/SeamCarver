@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -80,12 +79,6 @@ namespace WebUI.Controllers
                 var details = await _imageDetailService.GetDetailsAsync(_fsHelper.PrependPhysicalFolderPath(filename));
                 return View("Index", new ImageViewModel(_fsHelper.UserVirtualFolder, filename, details.Width, details.Height, details.Size, origfilename));
             }
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

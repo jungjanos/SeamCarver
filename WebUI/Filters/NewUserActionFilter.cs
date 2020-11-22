@@ -19,7 +19,7 @@ namespace WebUI.Filters
                 return;
 
             // if error happend with or without redirection by error middleware the we do not intercept
-            if (context.HttpContext.Response.StatusCode == 500 || context.HttpContext.Request.Path == "/image/error")
+            if (context.HttpContext.Response.StatusCode == 500 || context.HttpContext.Request.Path == "/error/info")
                 return;
 
             // if claim is set then intercept and redirect to handler 
