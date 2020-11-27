@@ -1,67 +1,62 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
     ViewBag.NavItem = "Account";
 }
 
 @using System.Security.Claims
 
-<table>
-    <tr>
-        <th>
-            IsAuthenticated
-        </th>
-        <td>
-            @ViewBag.ClaimsIdentity.IsAuthenticated
-        </td>
-    </tr>
-    <tr>
-        <th>
-            Name
-        </th>
-        <td>
-            @ViewBag.ClaimsIdentity.Name
-        </td>
-    </tr>
-</table>
-<h3>Claims from ClaimsIdentity</h3>
-<table class="table table-bordered table-striped">
-    <tr>
-        <th>
-            Claim Type
-        </th>
-        <th>
-            Claim Value
-        </th>
-        @*<th>
-                Value Type
-            </th>
-            <th>
-                Subject Name
-            </th>
-            <th>
-                Issuer Name
-            </th>*@
-    </tr>
-    @foreach (System.Security.Claims.Claim claim in ViewBag.Claims)
-    {
+
+<div class="col">
+
+    <h4 class="display-4 text-info">Account info</h4>
+
+    <div class="jumbotron jumbotron-fluid">
+        <div>
+            <p class="lead text-justify">
+
+                Here you can create, view all the pieces of data (claims) which represent your identity related information on this website.
+                Most claims are provided by the external identity provied in the form of an OIDC Id-token, some claims (e.g. LocalFolder) are added to your local identity after successful sign-in.
+                <br>
+                Of particular note is the "objectidentifier" claim which is your unique id at the identityprovider and is used to map your user account on this website to the ressources you use
+            </p>
+        </div>
+    </div>
+
+    <table class="table-light">
         <tr>
+            <th>
+                IsAuthenticated
+            </th>
             <td>
-                @claim.Type
+                @ViewBag.ClaimsIdentity.IsAuthenticated
             </td>
-            <td>
-                @claim.Value
-            </td>
-            @*<td>
-                    @claim.ValueType
-                </td>
-                <td>
-                    @claim.Subject.Name
-                </td>
-                <td>
-                    @claim.Issuer
-                </td>*@
         </tr>
-    }
-</table>
+    </table>
+
+    <table class="table table-striped table-responsive">
+        <tr>
+            <th>
+                Claim Type
+            </th>
+            <th>
+                Claim Value
+            </th>
+        </tr>
+        @foreach (System.Security.Claims.Claim claim in ViewBag.Claims)
+        {
+            <tr>
+                <td>
+                    @claim.Type
+                </td>
+                <td>
+                    @claim.Value
+                </td>
+            </tr>
+        }
+    </table>
+
+</div>
+
+@section Sidebar
+{
+    @await Html.PartialAsync("SidebarPartial", "Info")
+}

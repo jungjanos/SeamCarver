@@ -1,0 +1,12 @@
+﻿@model string
+
+<a class="btn btn-block
+   @(Model == "Info" ? "btn-secondary" : "btn-outline-secondary")"
+   asp-controller="Account" asp-action="Info">
+    Info
+</a>
+<a class="btn btn-block
+   @(Model == "Unregister" ? "btn-secondary" : "btn-outline-secondary")"
+   asp-controller="Account" asp-action="SelfRemove">
+    Unregister
+</a>

@@ -8,12 +8,39 @@
 
 @using System.Security.Claims
 
-<p>
-    Dear @ViewBag.ClaimsIdentity.Name, do you realy wish to delete your account and personal folder on this site?
-    You will be able to create a new account whenever you wish.
-</p>
 
-<form method="post" asp-action="SelfRemove">
-    <input type="submit" value="Submit">
-</form>
-<button asp-controller="Image" asp-action="index">Cancel </button>
+<div class="col">
+
+    <h4 class="display-4 text-info">Self Remove</h4>
+    <div class="jumbotron jumbotron-fluid">
+        <div class="col">
+            <p class="lead text-justify">
+
+                Here you can remove your app registration. 
+                All user stored user data and ressources will be deleted from the websites datastore. 
+                Please not that to revoke the app consent you gave the app to access user information hast to be revoked at the identity provider if you wish so.
+
+                You will be able to create a new account any time you wish.
+            </p>
+        </div>
+    </div>
+
+    <p>
+        Dear @ViewBag.ClaimsIdentity.Name, do you realy wish to delete your account and personal folder on this site?
+        You will be able to create a new account whenever you wish.
+    </p>
+
+    <form method="post" asp-action="SelfRemove">
+        <span class="text-nowrap">
+            <button type="submit" class="btn btn-sm btn-danger" value="remove">
+                Remove
+            </button>
+            <a class="btn btn-sm btn-primary" asp-controller="Image" asp-action="Index">Cancel</a>
+        </span>
+    </form>
+</div>
+
+@section Sidebar
+{
+    @await Html.PartialAsync("SidebarPartial", "Unregister")
+}
